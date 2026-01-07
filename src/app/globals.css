@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
+/* Variáveis de cores do SOS Pet */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --turquesa: #20B2AA;
+  --turquesa-dark: #1a9e97;
+  --laranja: #FF6B35;
+  --laranja-dark: #e85a2a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Ajuste para header fixo */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  padding-top: 80px;
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--turquesa);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--turquesa-dark);
 }
