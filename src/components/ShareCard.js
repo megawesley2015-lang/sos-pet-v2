@@ -9,12 +9,12 @@ export default function ShareCard({ pet }) {
   const isPerdido = pet.status === 'perdido';
   const isEncontrado = pet.status === 'encontrado';
   
-  const headerColor = isPerdido ? '#FF6B35' : isEncontrado ? '#16a34a' : '#3b82f6';
+  const headerColor = isPerdido ? '#FF851B' : isEncontrado ? '#16a34a' : '#3b82f6';
   const accentColor = '#20B2AA';
-  const statusText = isPerdido ? 'PET PERDIDO!' : isEncontrado ? 'PET ENCONTRADO!' : 'PARA ADOÇÃO!';
+  const statusText = isPerdido ? 'PET PERDIDO!' : isEncontrado ? 'PET ENCONTRADO!' : 'ADOÇÃO!';
   const ctaText = isPerdido ? 'AJUDE-O A VOLTAR PARA CASA! 🙏' : isEncontrado ? 'VOCÊ CONHECE ESSE PET? 🙏' : 'DÊ UM LAR A ESSE AMIGO! 💙';
 
-  // Função para gerar a imagem
+  // Função unificada para gerar imagem
   const generateImage = async () => {
     const { toPng } = await import('html-to-image');
     const element = document.getElementById('pet-share-card');
@@ -28,13 +28,13 @@ export default function ShareCard({ pet }) {
     setGenerating(true);
     setShowCard(true);
     
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 600));
     
     try {
       const dataUrl = await generateImage();
       
       const link = document.createElement('a');
-      link.download = `alerta-${pet.nome || 'pet'}-${Date.now()}.png`;
+      link.download = `sos-pet-${pet.nome || 'alerta'}-${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
     } catch (error) {
@@ -50,14 +50,14 @@ export default function ShareCard({ pet }) {
     setGenerating(true);
     setShowCard(true);
     
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 600));
     
     try {
       const dataUrl = await generateImage();
       
       const response = await fetch(dataUrl);
       const blob = await response.blob();
-      const file = new File([blob], `alerta-${pet.nome || 'pet'}.png`, { type: 'image/png' });
+      const file = new File([blob], `sos-pet-${pet.nome || 'alerta'}.png`, { type: 'image/png' });
 
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
@@ -66,9 +66,8 @@ export default function ShareCard({ pet }) {
           files: [file],
         });
       } else {
-        // Fallback: download
         const link = document.createElement('a');
-        link.download = `alerta-${pet.nome || 'pet'}.png`;
+        link.download = `sos-pet-${pet.nome || 'alerta'}.png`;
         link.href = dataUrl;
         link.click();
         alert('Imagem salva! Agora você pode compartilhar nas redes sociais.');
@@ -95,6 +94,19 @@ export default function ShareCard({ pet }) {
     return phone;
   };
 
+  // SVG da patinha branca
+  const PawPrint = ({ size = 24, color = 'white', opacity = 1, style = {} }) => (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill={color}
+      style={{ opacity, ...style }}
+    >
+      <path d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-3.5 8.5c-1 1-1 2.5 0 3.5l3 3c.5.5 1.5.5 2 0l3-3c1-1 1-2.5 0-3.5-1-1-2.5-1-3.5 0l-.5.5-.5-.5c-1-1-2.5-1-3.5 0z"/>
+    </svg>
+  );
+
   return (
     <>
       {/* Botões de ação */}
@@ -110,7 +122,7 @@ export default function ShareCard({ pet }) {
           <button
             onClick={handleShare}
             disabled={generating}
-            className="flex-1 bg-[#FF6B35] hover:bg-[#e85a2a] disabled:bg-gray-300 text-white py-3 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+            className="flex-1 bg-[#FF6B35] hover:bg-[#e85a2a] hover:-translate-y-1 disabled:bg-gray-300 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
             {generating ? (
               <>
@@ -125,14 +137,21 @@ export default function ShareCard({ pet }) {
           <button
             onClick={handleDownload}
             disabled={generating}
-            className="flex-1 bg-white hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-bold transition-all border-2 border-gray-200 flex items-center justify-center gap-2"
+            className="flex-1 bg-white hover:bg-gray-50 hover:-translate-y-1 disabled:bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-bold transition-all duration-300 border-2 border-gray-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
-            💾 Baixar Imagem
+            {generating ? (
+              <>
+                <span className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                Gerando...
+              </>
+            ) : (
+              <>💾 Baixar Imagem</>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Card para geração - Design Profissional */}
+      {/* ====== CARD PARA GERAÇÃO DE IMAGEM ====== */}
       {showCard && (
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
           <div
@@ -140,155 +159,171 @@ export default function ShareCard({ pet }) {
             style={{
               width: '1080px',
               height: '1350px',
-              background: '#f0f0f0',
-              fontFamily: 'Arial, sans-serif',
+              background: '#e8e8e8',
+              fontFamily: 'Arial, Helvetica, sans-serif',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '40px',
             }}
           >
-            {/* Card interno com sombra */}
+            {/* Card interno */}
             <div style={{
               width: '1000px',
               height: '1270px',
               background: '#ffffff',
-              borderRadius: '40px',
+              borderRadius: '32px',
               overflow: 'hidden',
-              boxShadow: '0 25px 80px rgba(0,0,0,0.15)',
+              boxShadow: '0 30px 100px rgba(0,0,0,0.2)',
               display: 'flex',
               flexDirection: 'column',
               position: 'relative',
             }}>
               
-              {/* Patinhas decorativas no fundo do card */}
+              {/* ===== PATINHAS DE FUNDO (Marca d'água) ===== */}
+              {/* Patinha superior esquerda */}
               <div style={{
                 position: 'absolute',
-                top: '200px',
-                left: '40px',
-                fontSize: '55px',
-                opacity: 0.07,
-                transform: 'rotate(-20deg)',
+                top: '180px',
+                left: '60px',
+                fontSize: '80px',
+                color: 'rgba(0, 0, 0, 0.05)',
+                transform: 'rotate(-25deg)',
               }}>🐾</div>
+              
+              {/* Patinha superior direita */}
               <div style={{
                 position: 'absolute',
-                top: '400px',
-                right: '40px',
-                fontSize: '50px',
-                opacity: 0.07,
-                transform: 'rotate(15deg)',
-              }}>🐾</div>
-              <div style={{
-                position: 'absolute',
-                bottom: '300px',
-                left: '50px',
-                fontSize: '45px',
-                opacity: 0.07,
-                transform: 'rotate(-10deg)',
-              }}>🐾</div>
-              <div style={{
-                position: 'absolute',
-                bottom: '400px',
+                top: '220px',
                 right: '50px',
-                fontSize: '48px',
-                opacity: 0.07,
+                fontSize: '70px',
+                color: 'rgba(0, 0, 0, 0.05)',
                 transform: 'rotate(20deg)',
               }}>🐾</div>
+              
+              {/* Patinha inferior esquerda */}
+              <div style={{
+                position: 'absolute',
+                bottom: '320px',
+                left: '70px',
+                fontSize: '65px',
+                color: 'rgba(0, 0, 0, 0.05)',
+                transform: 'rotate(-15deg)',
+              }}>🐾</div>
+              
+              {/* Patinha inferior direita */}
+              <div style={{
+                position: 'absolute',
+                bottom: '280px',
+                right: '60px',
+                fontSize: '75px',
+                color: 'rgba(0, 0, 0, 0.05)',
+                transform: 'rotate(30deg)',
+              }}>🐾</div>
 
-              {/* Header com patinhas BRANCAS */}
+              {/* ===== HEADER LARANJA ===== */}
               <div style={{
                 background: headerColor,
-                padding: '35px 40px',
+                padding: '28px 40px',
                 textAlign: 'center',
-                borderRadius: '0 0 30px 30px',
+                borderRadius: '0 0 32px 32px',
+                position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '20px',
               }}>
-                {/* Patinha esquerda - BRANCA */}
+                {/* Patinha BRANCA esquerda */}
                 <span style={{ 
-                  fontSize: '45px',
+                  fontSize: '40px',
                   filter: 'brightness(0) invert(1)',
-                  opacity: 0.9,
                 }}>🐾</span>
                 
-                <div style={{
-                  color: 'white',
-                  fontSize: '52px',
-                  fontWeight: '900',
-                  letterSpacing: '2px',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-                }}>
-                  {statusText}
+                {/* Texto com patinha sobreposta */}
+                <div style={{ position: 'relative' }}>
+                  <span style={{
+                    color: 'white',
+                    fontSize: '48px',
+                    fontWeight: '900',
+                    letterSpacing: '4px',
+                    textTransform: 'uppercase',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+                  }}>
+                    {statusText}
+                  </span>
+                  
+                  {/* Patinha pequena branca atrás do texto (overlay) */}
+                  <span style={{
+                    position: 'absolute',
+                    bottom: '-5px',
+                    right: '45%',
+                    fontSize: '22px',
+                    filter: 'brightness(0) invert(1)',
+                    opacity: 0.4,
+                  }}>🐾</span>
                 </div>
                 
-                {/* Patinha direita - BRANCA */}
+                {/* Patinha BRANCA direita */}
                 <span style={{ 
-                  fontSize: '45px',
+                  fontSize: '40px',
                   filter: 'brightness(0) invert(1)',
-                  opacity: 0.9,
                 }}>🐾</span>
               </div>
 
-              {/* Container da foto com 4 patinhas ao redor */}
+              {/* ===== ÁREA DA FOTO ===== */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',
-                marginTop: '40px',
+                marginTop: '50px',
                 marginBottom: '30px',
                 position: 'relative',
               }}>
                 {/* 4 Patinhas CINZA ao redor da foto */}
-                {/* Patinha superior esquerda */}
                 <span style={{
                   position: 'absolute',
-                  top: '-10px',
-                  left: '250px',
-                  fontSize: '50px',
-                  opacity: 0.15,
-                  transform: 'rotate(-30deg)',
+                  top: '-20px',
+                  left: '220px',
+                  fontSize: '55px',
+                  color: 'rgba(0, 0, 0, 0.08)',
+                  transform: 'rotate(-35deg)',
                 }}>🐾</span>
                 
-                {/* Patinha superior direita */}
                 <span style={{
                   position: 'absolute',
-                  top: '-10px',
-                  right: '250px',
-                  fontSize: '50px',
-                  opacity: 0.15,
-                  transform: 'rotate(30deg)',
+                  top: '-20px',
+                  right: '220px',
+                  fontSize: '55px',
+                  color: 'rgba(0, 0, 0, 0.08)',
+                  transform: 'rotate(35deg)',
                 }}>🐾</span>
                 
-                {/* Patinha inferior esquerda */}
                 <span style={{
                   position: 'absolute',
-                  bottom: '-10px',
-                  left: '250px',
-                  fontSize: '50px',
-                  opacity: 0.15,
-                  transform: 'rotate(-15deg)',
+                  bottom: '-20px',
+                  left: '220px',
+                  fontSize: '55px',
+                  color: 'rgba(0, 0, 0, 0.08)',
+                  transform: 'rotate(-20deg)',
                 }}>🐾</span>
                 
-                {/* Patinha inferior direita */}
                 <span style={{
                   position: 'absolute',
-                  bottom: '-10px',
-                  right: '250px',
-                  fontSize: '50px',
-                  opacity: 0.15,
-                  transform: 'rotate(15deg)',
+                  bottom: '-20px',
+                  right: '220px',
+                  fontSize: '55px',
+                  color: 'rgba(0, 0, 0, 0.08)',
+                  transform: 'rotate(20deg)',
                 }}>🐾</span>
 
-                {/* Foto circular */}
+                {/* Foto circular com borda verde água */}
                 <div style={{
-                  width: '380px',
-                  height: '380px',
+                  width: '400px',
+                  height: '400px',
                   borderRadius: '50%',
-                  border: `8px solid ${accentColor}`,
+                  border: `10px solid ${accentColor}`,
                   overflow: 'hidden',
-                  boxShadow: '0 15px 40px rgba(0,0,0,0.15)',
-                  background: '#f0f0f0',
+                  boxShadow: '0 20px 50px rgba(32, 178, 170, 0.3)',
+                  background: '#f5f5f5',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -305,43 +340,62 @@ export default function ShareCard({ pet }) {
                       crossOrigin="anonymous"
                     />
                   ) : (
-                    <span style={{ fontSize: '150px' }}>
+                    <span style={{ fontSize: '160px' }}>
                       {pet.especie === 'cao' ? '🐕' : pet.especie === 'gato' ? '🐈' : '🐾'}
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Nome do Pet */}
+              {/* ===== NOME DO PET com patinhas laterais ===== */}
               <div style={{
                 textAlign: 'center',
-                marginBottom: '10px',
+                marginBottom: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '20px',
               }}>
+                {/* Patinha esquerda do nome */}
+                <span style={{ 
+                  fontSize: '35px',
+                  color: 'rgba(0, 0, 0, 0.15)',
+                }}>🐾</span>
+                
                 <div style={{
-                  fontSize: '64px',
+                  fontSize: '72px',
                   fontWeight: '900',
                   color: '#1f2937',
                 }}>
                   {pet.nome || 'Pet sem nome'}
                 </div>
-                {pet.comportamento && (
-                  <div style={{
-                    fontSize: '28px',
-                    color: '#6b7280',
-                    marginTop: '5px',
-                  }}>
-                    ({pet.comportamento})
-                  </div>
-                )}
+                
+                {/* Patinha direita do nome */}
+                <span style={{ 
+                  fontSize: '35px',
+                  color: 'rgba(0, 0, 0, 0.15)',
+                }}>🐾</span>
               </div>
 
-              {/* Informações do Pet */}
+              {/* Comportamento */}
+              {pet.comportamento && (
+                <div style={{
+                  textAlign: 'center',
+                  fontSize: '28px',
+                  color: '#6b7280',
+                  marginBottom: '15px',
+                }}>
+                  ({pet.comportamento})
+                </div>
+              )}
+
+              {/* ===== INFORMAÇÕES DO PET ===== */}
               <div style={{
                 textAlign: 'center',
-                fontSize: '30px',
+                fontSize: '32px',
                 color: '#374151',
-                lineHeight: '1.8',
-                marginBottom: '25px',
+                lineHeight: '2',
+                marginBottom: '30px',
               }}>
                 <div><strong>Espécie:</strong> {pet.especie === 'cao' ? 'Cachorro' : pet.especie === 'gato' ? 'Gato' : pet.especie}</div>
                 {pet.idade_aproximada && <div><strong>Idade:</strong> {pet.idade_aproximada}</div>}
@@ -349,33 +403,39 @@ export default function ShareCard({ pet }) {
                 {pet.porte && <div><strong>Porte:</strong> {pet.porte}</div>}
               </div>
 
-              {/* Faixa de Localização */}
+              {/* ===== FAIXA DE LOCALIZAÇÃO VERDE ÁGUA ===== */}
               <div style={{
                 background: accentColor,
-                padding: '25px 40px',
+                padding: '28px 50px',
                 textAlign: 'center',
-                margin: '0 40px',
+                margin: '0 50px',
                 borderRadius: '20px',
+                boxShadow: '0 10px 30px rgba(32, 178, 170, 0.3)',
               }}>
                 <div style={{
                   color: 'white',
                   fontSize: '26px',
-                  marginBottom: '8px',
+                  marginBottom: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
                 }}>
-                  📍 {isPerdido ? 'Visto pela última vez em:' : 'Encontrado em:'}
+                  <span>📍</span>
+                  <span>{isPerdido ? 'Visto pela última vez em:' : 'Encontrado em:'}</span>
                 </div>
                 <div style={{
                   color: 'white',
-                  fontSize: '36px',
-                  fontWeight: '700',
+                  fontSize: '40px',
+                  fontWeight: '800',
                 }}>
                   {pet.localizacao}
                 </div>
               </div>
 
-              {/* Contatos */}
+              {/* ===== CONTATOS ===== */}
               <div style={{
-                padding: '30px 60px',
+                padding: '35px 60px',
                 textAlign: 'center',
               }}>
                 {/* Telefone */}
@@ -384,11 +444,14 @@ export default function ShareCard({ pet }) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '15px',
-                  fontSize: '36px',
+                  fontSize: '38px',
                   color: '#374151',
-                  marginBottom: '15px',
+                  marginBottom: '18px',
                 }}>
-                  <span style={{ color: '#dc2626', fontSize: '40px' }}>📞</span>
+                  <span style={{ 
+                    fontSize: '45px',
+                    color: '#dc2626',
+                  }}>📞</span>
                   <span><strong>LIGAR:</strong> {formatPhone(pet.contato_telefone)}</span>
                 </div>
                 
@@ -398,22 +461,22 @@ export default function ShareCard({ pet }) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '15px',
-                  fontSize: '36px',
+                  fontSize: '38px',
                   color: '#25D366',
                 }}>
-                  <span style={{ fontSize: '40px' }}>💬</span>
+                  <span style={{ fontSize: '45px' }}>💬</span>
                   <span><strong>WHATSAPP:</strong> {formatPhone(pet.contato_telefone)}</span>
                 </div>
               </div>
 
-              {/* CTA Final */}
+              {/* ===== CTA FINAL ===== */}
               <div style={{
                 textAlign: 'center',
-                padding: '20px',
+                padding: '15px 40px',
                 marginTop: 'auto',
               }}>
                 <div style={{
-                  fontSize: '38px',
+                  fontSize: '40px',
                   fontWeight: '900',
                   color: '#1f2937',
                   letterSpacing: '1px',
@@ -422,24 +485,24 @@ export default function ShareCard({ pet }) {
                 </div>
               </div>
 
-              {/* Footer com Logo */}
+              {/* ===== FOOTER COM LOGO ===== */}
               <div style={{
                 background: '#1f2937',
-                padding: '20px',
+                padding: '22px 40px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '15px',
               }}>
-                <span style={{ fontSize: '35px' }}>🐾</span>
+                <span style={{ fontSize: '38px' }}>🐾</span>
                 <span style={{
                   color: '#FF6B35',
-                  fontSize: '32px',
+                  fontSize: '36px',
                   fontWeight: '900',
                 }}>SOS Pet</span>
                 <span style={{
-                  color: '#9ca3af',
-                  fontSize: '24px',
+                  color: '#6b7280',
+                  fontSize: '26px',
                 }}>| sospet.vercel.app</span>
               </div>
             </div>
