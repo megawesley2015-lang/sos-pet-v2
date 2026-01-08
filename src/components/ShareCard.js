@@ -11,8 +11,18 @@ export default function ShareCard({ pet }) {
   
   const headerColor = isPerdido ? '#FF6B35' : isEncontrado ? '#16a34a' : '#3b82f6';
   const accentColor = '#20B2AA';
-  const statusText = isPerdido ? '🐾 PET PERDIDO! 🐾' : isEncontrado ? '🐾 PET ENCONTRADO! 🐾' : '🐾 PARA ADOÇÃO! 🐾';
+  const statusText = isPerdido ? 'PET PERDIDO!' : isEncontrado ? 'PET ENCONTRADO!' : 'PARA ADOÇÃO!';
   const ctaText = isPerdido ? 'AJUDE-O A VOLTAR PARA CASA! 🙏' : isEncontrado ? 'VOCÊ CONHECE ESSE PET? 🙏' : 'DÊ UM LAR A ESSE AMIGO! 💙';
+
+  // Função para gerar a imagem
+  const generateImage = async () => {
+    const { toPng } = await import('html-to-image');
+    const element = document.getElementById('pet-share-card');
+    
+    if (!element) throw new Error('Card não encontrado');
+
+    return await toPng(element, { quality: 1, pixelRatio: 2 });
+  };
 
   const handleDownload = async () => {
     setGenerating(true);
@@ -21,12 +31,7 @@ export default function ShareCard({ pet }) {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     try {
-      const { toPng } = await import('html-to-image');
-      const element = document.getElementById('pet-share-card');
-      
-      if (!element) throw new Error('Card não encontrado');
-
-      const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2 });
+      const dataUrl = await generateImage();
       
       const link = document.createElement('a');
       link.download = `alerta-${pet.nome || 'pet'}-${Date.now()}.png`;
@@ -48,12 +53,7 @@ export default function ShareCard({ pet }) {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     try {
-      const { toPng } = await import('html-to-image');
-      const element = document.getElementById('pet-share-card');
-      
-      if (!element) throw new Error('Card não encontrado');
-
-      const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2 });
+      const dataUrl = await generateImage();
       
       const response = await fetch(dataUrl);
       const blob = await response.blob();
@@ -66,6 +66,7 @@ export default function ShareCard({ pet }) {
           files: [file],
         });
       } else {
+        // Fallback: download
         const link = document.createElement('a');
         link.download = `alerta-${pet.nome || 'pet'}.png`;
         link.href = dataUrl;
@@ -87,6 +88,9 @@ export default function ShareCard({ pet }) {
     const cleaned = phone?.replace(/\D/g, '') || '';
     if (cleaned.length === 11) {
       return `(${cleaned.slice(0,2)}) ${cleaned.slice(2,7)}-${cleaned.slice(7)}`;
+    }
+    if (cleaned.length === 10) {
+      return `(${cleaned.slice(0,2)}) ${cleaned.slice(2,6)}-${cleaned.slice(6)}`;
     }
     return phone;
   };
@@ -136,7 +140,7 @@ export default function ShareCard({ pet }) {
             style={{
               width: '1080px',
               height: '1350px',
-              background: '#f5f5f5',
+              background: '#f0f0f0',
               fontFamily: 'Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
@@ -157,73 +161,126 @@ export default function ShareCard({ pet }) {
               position: 'relative',
             }}>
               
-              {/* Patinhas decorativas no fundo */}
+              {/* Patinhas decorativas no fundo do card */}
               <div style={{
                 position: 'absolute',
-                top: '180px',
-                left: '30px',
-                fontSize: '60px',
-                opacity: 0.08,
-                transform: 'rotate(-15deg)',
+                top: '200px',
+                left: '40px',
+                fontSize: '55px',
+                opacity: 0.07,
+                transform: 'rotate(-20deg)',
               }}>🐾</div>
               <div style={{
                 position: 'absolute',
-                top: '350px',
-                right: '30px',
+                top: '400px',
+                right: '40px',
                 fontSize: '50px',
-                opacity: 0.08,
-                transform: 'rotate(20deg)',
+                opacity: 0.07,
+                transform: 'rotate(15deg)',
               }}>🐾</div>
               <div style={{
                 position: 'absolute',
-                bottom: '250px',
+                bottom: '300px',
                 left: '50px',
                 fontSize: '45px',
-                opacity: 0.08,
+                opacity: 0.07,
                 transform: 'rotate(-10deg)',
               }}>🐾</div>
               <div style={{
                 position: 'absolute',
-                bottom: '350px',
-                right: '60px',
-                fontSize: '55px',
-                opacity: 0.08,
-                transform: 'rotate(15deg)',
+                bottom: '400px',
+                right: '50px',
+                fontSize: '48px',
+                opacity: 0.07,
+                transform: 'rotate(20deg)',
               }}>🐾</div>
 
-              {/* Header Laranja */}
+              {/* Header com patinhas BRANCAS */}
               <div style={{
                 background: headerColor,
                 padding: '35px 40px',
                 textAlign: 'center',
                 borderRadius: '0 0 30px 30px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '20px',
               }}>
+                {/* Patinha esquerda - BRANCA */}
+                <span style={{ 
+                  fontSize: '45px',
+                  filter: 'brightness(0) invert(1)',
+                  opacity: 0.9,
+                }}>🐾</span>
+                
                 <div style={{
                   color: 'white',
                   fontSize: '52px',
                   fontWeight: '900',
-                  letterSpacing: '3px',
+                  letterSpacing: '2px',
                   textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
                 }}>
                   {statusText}
                 </div>
+                
+                {/* Patinha direita - BRANCA */}
+                <span style={{ 
+                  fontSize: '45px',
+                  filter: 'brightness(0) invert(1)',
+                  opacity: 0.9,
+                }}>🐾</span>
               </div>
 
-              {/* Patinha decorativa abaixo do header */}
-              <div style={{
-                textAlign: 'center',
-                marginTop: '-15px',
-              }}>
-                <span style={{ fontSize: '50px', opacity: 0.3 }}>🐾</span>
-              </div>
-
-              {/* Foto circular */}
+              {/* Container da foto com 4 patinhas ao redor */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',
-                marginTop: '20px',
+                marginTop: '40px',
                 marginBottom: '30px',
+                position: 'relative',
               }}>
+                {/* 4 Patinhas CINZA ao redor da foto */}
+                {/* Patinha superior esquerda */}
+                <span style={{
+                  position: 'absolute',
+                  top: '-10px',
+                  left: '250px',
+                  fontSize: '50px',
+                  opacity: 0.15,
+                  transform: 'rotate(-30deg)',
+                }}>🐾</span>
+                
+                {/* Patinha superior direita */}
+                <span style={{
+                  position: 'absolute',
+                  top: '-10px',
+                  right: '250px',
+                  fontSize: '50px',
+                  opacity: 0.15,
+                  transform: 'rotate(30deg)',
+                }}>🐾</span>
+                
+                {/* Patinha inferior esquerda */}
+                <span style={{
+                  position: 'absolute',
+                  bottom: '-10px',
+                  left: '250px',
+                  fontSize: '50px',
+                  opacity: 0.15,
+                  transform: 'rotate(-15deg)',
+                }}>🐾</span>
+                
+                {/* Patinha inferior direita */}
+                <span style={{
+                  position: 'absolute',
+                  bottom: '-10px',
+                  right: '250px',
+                  fontSize: '50px',
+                  opacity: 0.15,
+                  transform: 'rotate(15deg)',
+                }}>🐾</span>
+
+                {/* Foto circular */}
                 <div style={{
                   width: '380px',
                   height: '380px',
@@ -331,24 +388,22 @@ export default function ShareCard({ pet }) {
                   color: '#374151',
                   marginBottom: '15px',
                 }}>
-                  <span style={{ fontSize: '40px' }}>📞</span>
+                  <span style={{ color: '#dc2626', fontSize: '40px' }}>📞</span>
                   <span><strong>LIGAR:</strong> {formatPhone(pet.contato_telefone)}</span>
                 </div>
                 
                 {/* WhatsApp */}
-                {pet.contato_whatsapp && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '15px',
-                    fontSize: '36px',
-                    color: '#25D366',
-                  }}>
-                    <span style={{ fontSize: '40px' }}>💬</span>
-                    <span><strong>WHATSAPP:</strong> {formatPhone(pet.contato_telefone)}</span>
-                  </div>
-                )}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '15px',
+                  fontSize: '36px',
+                  color: '#25D366',
+                }}>
+                  <span style={{ fontSize: '40px' }}>💬</span>
+                  <span><strong>WHATSAPP:</strong> {formatPhone(pet.contato_telefone)}</span>
+                </div>
               </div>
 
               {/* CTA Final */}
