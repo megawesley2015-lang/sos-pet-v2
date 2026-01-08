@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 import { getPetById } from "@/services/pets.service";
 import ShareCard from "@/components/ShareCard";
 
@@ -39,13 +40,23 @@ export default function PetDetalhes() {
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     async function fetchPet() {
       try {
         setLoading(true);
+        
+        // Buscar pet
         const data = await getPetById(params.id);
         setPet(data);
+
+        // Verificar se é o dono
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && data && session.user.id === data.user_id) {
+          setIsOwner(true);
+        }
+
       } catch (err) {
         console.error("Erro ao carregar pet:", err);
         setError("Pet não encontrado");
@@ -93,13 +104,25 @@ export default function PetDetalhes() {
     <main className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4">
         
-        {/* Voltar */}
-        <Link 
-          href="/achados-e-perdidos" 
-          className="inline-flex items-center text-gray-600 hover:text-[#20B2AA] font-medium mb-8"
-        >
-          ← Voltar para a lista
-        </Link>
+        {/* Header com navegação */}
+        <div className="flex justify-between items-center mb-8">
+          <Link 
+            href="/achados-e-perdidos" 
+            className="inline-flex items-center text-gray-600 hover:text-[#20B2AA] font-medium"
+          >
+            ← Voltar para a lista
+          </Link>
+
+          {/* Botão editar para o dono */}
+          {isOwner && (
+            <Link
+              href={`/achados-e-perdidos/editar/${pet.id}`}
+              className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2"
+            >
+              ✏️ Editar
+            </Link>
+          )}
+        </div>
 
         <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
           
@@ -158,7 +181,7 @@ export default function PetDetalhes() {
                 {pet.sexo && (
                   <div className="flex justify-between">
                     <span className="text-gray-500">Sexo</span>
-                    <span className="font-medium capitalize">{pet.sexo === 'macho' ? 'Macho' : 'Fêmea'}</span>
+                    <span className="font-medium capitalize">{pet.sexo === 'macho' ? 'Macho' : pet.sexo === 'femea' ? 'Fêmea' : 'Indefinido'}</span>
                   </div>
                 )}
                 
@@ -216,7 +239,7 @@ export default function PetDetalhes() {
               <h3 className="font-bold text-gray-800 mb-4">Entre em Contato</h3>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                {pet.contato_whatsapp ? (
+                {pet.contato_whatsapp && (
                   <a
                     href={whatsappLink}
                     target="_blank"
@@ -228,7 +251,7 @@ export default function PetDetalhes() {
                     </svg>
                     WhatsApp
                   </a>
-                ) : null}
+                )}
                 
                 <a
                   href={`tel:${pet.contato_telefone}`}
