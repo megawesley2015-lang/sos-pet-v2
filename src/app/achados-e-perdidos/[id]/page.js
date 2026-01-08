@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getPetById } from "@/services/pets.service";
+import ShareCard from "@/components/ShareCard";
 
 const STATUS_CONFIG = {
   perdido: {
@@ -35,7 +36,6 @@ const ESPECIE_EMOJI = {
 
 export default function PetDetalhes() {
   const params = useParams();
-  const router = useRouter();
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -139,6 +139,9 @@ export default function PetDetalhes() {
             <div className={`${statusConfig.bg} ${statusConfig.text} p-4 rounded-xl mb-8`}>
               <p className="font-medium">{statusConfig.description}</p>
             </div>
+
+            {/* 📸 SEÇÃO DE COMPARTILHAMENTO */}
+            <ShareCard pet={pet} />
 
             {/* Informações Detalhadas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
