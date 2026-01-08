@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function AuthCallback() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Capturar o código da URL (para magic link / reset password)
+        // Capturar o código da URL
         const code = searchParams.get("code");
         
         if (code) {
-          // Trocar o código por uma sessão
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           
           if (error) {
@@ -25,18 +24,15 @@ export default function AuthCallback() {
           }
         }
 
-        // Verificar se há sessão ativa
+        // Verificar sessão
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
-          // Verificar se veio de recuperação de senha
           const type = searchParams.get("type");
           
           if (type === "recovery") {
-            // Redirecionar para página de redefinir senha
             router.push("/redefinir-senha");
           } else {
-            // Redirecionar para home ou página anterior
             const next = searchParams.get("next") || "/";
             router.push(next);
           }
@@ -53,11 +49,24 @@ export default function AuthCallback() {
   }, [router, searchParams]);
 
   return (
+    <div className="text-center">
+      <div className="inline-block w-12 h-12 border-4 border-[#20B2AA] border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-gray-600 font-medium">Autenticando...</p>
+    </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="inline-block w-12 h-12 border-4 border-[#20B2AA] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-gray-600 font-medium">Autenticando...</p>
-      </div>
+      <Suspense fallback={
+        <div className="text-center">
+          <div className="inline-block w-12 h-12 border-4 border-[#20B2AA] border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600 font-medium">Carregando...</p>
+        </div>
+      }>
+        <AuthCallbackContent />
+      </Suspense>
     </main>
   );
 }
