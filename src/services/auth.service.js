@@ -1,4 +1,12 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from "@/lib/supabase";
+
+// URL base do site (produção ou desenvolvimento)
+const getBaseUrl = () => {
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://sos-pet-v2.vercel.app";
+};
 
 /**
  * Registrar novo usuário
@@ -10,15 +18,12 @@ export async function registrar({ email, password, nome }) {
     options: {
       data: {
         nome: nome,
-      }
-    }
+      },
+      emailRedirectTo: `${getBaseUrl()}/auth/callback`,
+    },
   });
 
-  if (error) {
-    console.error('Erro ao registrar:', error);
-    throw error;
-  }
-
+  if (error) throw error;
   return data;
 }
 
@@ -31,11 +36,7 @@ export async function login({ email, password }) {
     password,
   });
 
-  if (error) {
-    console.error('Erro ao fazer login:', error);
-    throw error;
-  }
-
+  if (error) throw error;
   return data;
 }
 
@@ -44,13 +45,7 @@ export async function login({ email, password }) {
  */
 export async function logout() {
   const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    console.error('Erro ao fazer logout:', error);
-    throw error;
-  }
-
-  return true;
+  if (error) throw error;
 }
 
 /**
@@ -58,12 +53,7 @@ export async function logout() {
  */
 export async function getUser() {
   const { data: { user }, error } = await supabase.auth.getUser();
-
-  if (error) {
-    console.error('Erro ao obter usuário:', error);
-    return null;
-  }
-
+  if (error) throw error;
   return user;
 }
 
@@ -72,28 +62,19 @@ export async function getUser() {
  */
 export async function getSession() {
   const { data: { session }, error } = await supabase.auth.getSession();
-
-  if (error) {
-    console.error('Erro ao obter sessão:', error);
-    return null;
-  }
-
+  if (error) throw error;
   return session;
 }
 
 /**
- * Recuperar senha
+ * Recuperar senha (enviar email)
  */
 export async function recuperarSenha(email) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: `${getBaseUrl()}/auth/callback?type=recovery`,
   });
 
-  if (error) {
-    console.error('Erro ao enviar email de recuperação:', error);
-    throw error;
-  }
-
+  if (error) throw error;
   return data;
 }
 
@@ -102,14 +83,10 @@ export async function recuperarSenha(email) {
  */
 export async function atualizarSenha(newPassword) {
   const { data, error } = await supabase.auth.updateUser({
-    password: newPassword
+    password: newPassword,
   });
 
-  if (error) {
-    console.error('Erro ao atualizar senha:', error);
-    throw error;
-  }
-
+  if (error) throw error;
   return data;
 }
 
