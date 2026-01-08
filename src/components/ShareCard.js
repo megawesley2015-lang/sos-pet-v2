@@ -7,25 +7,24 @@ export default function ShareCard({ pet }) {
   const [showCard, setShowCard] = useState(false);
 
   const isPerdido = pet.status === 'perdido';
-  const statusColor = isPerdido ? '#dc2626' : '#16a34a';
-  const statusText = isPerdido ? '🚨 PERDIDO' : '✅ ENCONTRADO';
-  const statusBg = isPerdido ? '#fef2f2' : '#f0fdf4';
+  const isEncontrado = pet.status === 'encontrado';
+  
+  const headerColor = isPerdido ? '#FF6B35' : isEncontrado ? '#16a34a' : '#3b82f6';
+  const accentColor = '#20B2AA';
+  const statusText = isPerdido ? '🐾 PET PERDIDO! 🐾' : isEncontrado ? '🐾 PET ENCONTRADO! 🐾' : '🐾 PARA ADOÇÃO! 🐾';
+  const ctaText = isPerdido ? 'AJUDE-O A VOLTAR PARA CASA! 🙏' : isEncontrado ? 'VOCÊ CONHECE ESSE PET? 🙏' : 'DÊ UM LAR A ESSE AMIGO! 💙';
 
   const handleDownload = async () => {
     setGenerating(true);
     setShowCard(true);
     
-    // Aguardar renderização
     await new Promise(resolve => setTimeout(resolve, 500));
     
     try {
-      // Importar dinamicamente html-to-image
       const { toPng } = await import('html-to-image');
       const element = document.getElementById('pet-share-card');
       
-      if (!element) {
-        throw new Error('Card não encontrado');
-      }
+      if (!element) throw new Error('Card não encontrado');
 
       const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2 });
       
@@ -52,18 +51,14 @@ export default function ShareCard({ pet }) {
       const { toPng } = await import('html-to-image');
       const element = document.getElementById('pet-share-card');
       
-      if (!element) {
-        throw new Error('Card não encontrado');
-      }
+      if (!element) throw new Error('Card não encontrado');
 
       const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2 });
       
-      // Converter para blob
       const response = await fetch(dataUrl);
       const blob = await response.blob();
       const file = new File([blob], `alerta-${pet.nome || 'pet'}.png`, { type: 'image/png' });
 
-      // Tentar compartilhar nativamente
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: `🚨 Pet ${pet.status === 'perdido' ? 'Perdido' : 'Encontrado'}`,
@@ -71,7 +66,6 @@ export default function ShareCard({ pet }) {
           files: [file],
         });
       } else {
-        // Fallback: download
         const link = document.createElement('a');
         link.download = `alerta-${pet.nome || 'pet'}.png`;
         link.href = dataUrl;
@@ -86,6 +80,15 @@ export default function ShareCard({ pet }) {
       setGenerating(false);
       setShowCard(false);
     }
+  };
+
+  // Formatar telefone
+  const formatPhone = (phone) => {
+    const cleaned = phone?.replace(/\D/g, '') || '';
+    if (cleaned.length === 11) {
+      return `(${cleaned.slice(0,2)}) ${cleaned.slice(2,7)}-${cleaned.slice(7)}`;
+    }
+    return phone;
   };
 
   return (
@@ -111,9 +114,7 @@ export default function ShareCard({ pet }) {
                 Gerando...
               </>
             ) : (
-              <>
-                📤 Compartilhar
-              </>
+              <>📤 Compartilhar</>
             )}
           </button>
           
@@ -127,156 +128,265 @@ export default function ShareCard({ pet }) {
         </div>
       </div>
 
-      {/* Card invisível para geração de imagem */}
+      {/* Card para geração - Design Profissional */}
       {showCard && (
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
           <div
             id="pet-share-card"
             style={{
               width: '1080px',
-              height: '1080px',
-              background: '#ffffff',
+              height: '1350px',
+              background: '#f5f5f5',
               fontFamily: 'Arial, sans-serif',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-            }}
-          >
-            {/* Header */}
-            <div style={{
-              background: statusBg,
-              padding: '24px 32px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              borderBottom: `4px solid ${statusColor}`,
-            }}>
-              <div style={{
-                background: statusColor,
-                color: 'white',
-                fontSize: '32px',
-                fontWeight: '900',
-                padding: '12px 32px',
-                borderRadius: '50px',
-                letterSpacing: '2px',
-              }}>
-                {statusText}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '40px' }}>🐾</span>
-                <span style={{ fontSize: '28px', fontWeight: '900', color: '#FF6B35' }}>
-                  SOS Pet
-                </span>
-              </div>
-            </div>
-
-            {/* Imagem */}
-            <div style={{
-              flex: 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '32px',
-              background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)',
+              padding: '40px',
+            }}
+          >
+            {/* Card interno com sombra */}
+            <div style={{
+              width: '1000px',
+              height: '1270px',
+              background: '#ffffff',
+              borderRadius: '40px',
+              overflow: 'hidden',
+              boxShadow: '0 25px 80px rgba(0,0,0,0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
             }}>
-              {pet.imagem_url ? (
-                <img
-                  src={pet.imagem_url}
-                  alt={pet.nome || 'Pet'}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '500px',
-                    objectFit: 'contain',
-                    borderRadius: '24px',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-                  }}
-                  crossOrigin="anonymous"
-                />
-              ) : (
+              
+              {/* Patinhas decorativas no fundo */}
+              <div style={{
+                position: 'absolute',
+                top: '180px',
+                left: '30px',
+                fontSize: '60px',
+                opacity: 0.08,
+                transform: 'rotate(-15deg)',
+              }}>🐾</div>
+              <div style={{
+                position: 'absolute',
+                top: '350px',
+                right: '30px',
+                fontSize: '50px',
+                opacity: 0.08,
+                transform: 'rotate(20deg)',
+              }}>🐾</div>
+              <div style={{
+                position: 'absolute',
+                bottom: '250px',
+                left: '50px',
+                fontSize: '45px',
+                opacity: 0.08,
+                transform: 'rotate(-10deg)',
+              }}>🐾</div>
+              <div style={{
+                position: 'absolute',
+                bottom: '350px',
+                right: '60px',
+                fontSize: '55px',
+                opacity: 0.08,
+                transform: 'rotate(15deg)',
+              }}>🐾</div>
+
+              {/* Header Laranja */}
+              <div style={{
+                background: headerColor,
+                padding: '35px 40px',
+                textAlign: 'center',
+                borderRadius: '0 0 30px 30px',
+              }}>
                 <div style={{
-                  width: '400px',
-                  height: '400px',
-                  background: 'white',
-                  borderRadius: '24px',
+                  color: 'white',
+                  fontSize: '52px',
+                  fontWeight: '900',
+                  letterSpacing: '3px',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+                }}>
+                  {statusText}
+                </div>
+              </div>
+
+              {/* Patinha decorativa abaixo do header */}
+              <div style={{
+                textAlign: 'center',
+                marginTop: '-15px',
+              }}>
+                <span style={{ fontSize: '50px', opacity: 0.3 }}>🐾</span>
+              </div>
+
+              {/* Foto circular */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                marginTop: '20px',
+                marginBottom: '30px',
+              }}>
+                <div style={{
+                  width: '380px',
+                  height: '380px',
+                  borderRadius: '50%',
+                  border: `8px solid ${accentColor}`,
+                  overflow: 'hidden',
+                  boxShadow: '0 15px 40px rgba(0,0,0,0.15)',
+                  background: '#f0f0f0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '180px',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
                 }}>
-                  {pet.especie === 'cao' ? '🐕' : pet.especie === 'gato' ? '🐈' : '🐾'}
+                  {pet.imagem_url ? (
+                    <img
+                      src={pet.imagem_url}
+                      alt={pet.nome || 'Pet'}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                      crossOrigin="anonymous"
+                    />
+                  ) : (
+                    <span style={{ fontSize: '150px' }}>
+                      {pet.especie === 'cao' ? '🐕' : pet.especie === 'gato' ? '🐈' : '🐾'}
+                    </span>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div style={{
-              background: 'white',
-              padding: '32px',
-              borderTop: '1px solid #e5e7eb',
-            }}>
-              <div style={{
-                fontSize: '48px',
-                fontWeight: '900',
-                color: '#1f2937',
-                marginBottom: '8px',
-              }}>
-                {pet.nome || 'Pet sem nome'}
-              </div>
-              
-              <div style={{
-                fontSize: '24px',
-                color: '#6b7280',
-                marginBottom: '24px',
-              }}>
-                {pet.especie === 'cao' ? 'Cão' : pet.especie === 'gato' ? 'Gato' : pet.especie}
-                {pet.raca ? ` • ${pet.raca}` : ''}
-                {pet.cor ? ` • ${pet.cor}` : ''}
               </div>
 
+              {/* Nome do Pet */}
               <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                fontSize: '28px',
+                textAlign: 'center',
+                marginBottom: '10px',
+              }}>
+                <div style={{
+                  fontSize: '64px',
+                  fontWeight: '900',
+                  color: '#1f2937',
+                }}>
+                  {pet.nome || 'Pet sem nome'}
+                </div>
+                {pet.comportamento && (
+                  <div style={{
+                    fontSize: '28px',
+                    color: '#6b7280',
+                    marginTop: '5px',
+                  }}>
+                    ({pet.comportamento})
+                  </div>
+                )}
+              </div>
+
+              {/* Informações do Pet */}
+              <div style={{
+                textAlign: 'center',
+                fontSize: '30px',
                 color: '#374151',
-                marginBottom: '16px',
-                background: '#f3f4f6',
-                padding: '16px 24px',
-                borderRadius: '12px',
+                lineHeight: '1.8',
+                marginBottom: '25px',
               }}>
-                <span style={{ fontSize: '32px' }}>📍</span>
-                <span>
-                  <strong>{isPerdido ? 'Visto em:' : 'Encontrado em:'}</strong> {pet.localizacao}
-                </span>
+                <div><strong>Espécie:</strong> {pet.especie === 'cao' ? 'Cachorro' : pet.especie === 'gato' ? 'Gato' : pet.especie}</div>
+                {pet.idade_aproximada && <div><strong>Idade:</strong> {pet.idade_aproximada}</div>}
+                {pet.raca && <div><strong>Raça:</strong> {pet.raca}{pet.cor ? `, ${pet.cor}` : ''}</div>}
+                {pet.porte && <div><strong>Porte:</strong> {pet.porte}</div>}
               </div>
 
+              {/* Faixa de Localização */}
               <div style={{
-                background: '#20B2AA',
-                color: 'white',
-                padding: '20px 32px',
-                borderRadius: '16px',
+                background: accentColor,
+                padding: '25px 40px',
+                textAlign: 'center',
+                margin: '0 40px',
+                borderRadius: '20px',
+              }}>
+                <div style={{
+                  color: 'white',
+                  fontSize: '26px',
+                  marginBottom: '8px',
+                }}>
+                  📍 {isPerdido ? 'Visto pela última vez em:' : 'Encontrado em:'}
+                </div>
+                <div style={{
+                  color: 'white',
+                  fontSize: '36px',
+                  fontWeight: '700',
+                }}>
+                  {pet.localizacao}
+                </div>
+              </div>
+
+              {/* Contatos */}
+              <div style={{
+                padding: '30px 60px',
+                textAlign: 'center',
+              }}>
+                {/* Telefone */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '15px',
+                  fontSize: '36px',
+                  color: '#374151',
+                  marginBottom: '15px',
+                }}>
+                  <span style={{ fontSize: '40px' }}>📞</span>
+                  <span><strong>LIGAR:</strong> {formatPhone(pet.contato_telefone)}</span>
+                </div>
+                
+                {/* WhatsApp */}
+                {pet.contato_whatsapp && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '15px',
+                    fontSize: '36px',
+                    color: '#25D366',
+                  }}>
+                    <span style={{ fontSize: '40px' }}>💬</span>
+                    <span><strong>WHATSAPP:</strong> {formatPhone(pet.contato_telefone)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* CTA Final */}
+              <div style={{
+                textAlign: 'center',
+                padding: '20px',
+                marginTop: 'auto',
+              }}>
+                <div style={{
+                  fontSize: '38px',
+                  fontWeight: '900',
+                  color: '#1f2937',
+                  letterSpacing: '1px',
+                }}>
+                  {ctaText}
+                </div>
+              </div>
+
+              {/* Footer com Logo */}
+              <div style={{
+                background: '#1f2937',
+                padding: '20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '16px',
-                fontSize: '32px',
-                fontWeight: '700',
+                gap: '15px',
               }}>
-                <span>📞</span>
-                <span>CONTATO: {pet.contato_telefone}</span>
+                <span style={{ fontSize: '35px' }}>🐾</span>
+                <span style={{
+                  color: '#FF6B35',
+                  fontSize: '32px',
+                  fontWeight: '900',
+                }}>SOS Pet</span>
+                <span style={{
+                  color: '#9ca3af',
+                  fontSize: '24px',
+                }}>| sospet.vercel.app</span>
               </div>
-            </div>
-
-            {/* Footer */}
-            <div style={{
-              background: '#1f2937',
-              color: 'white',
-              padding: '16px 32px',
-              textAlign: 'center',
-              fontSize: '18px',
-            }}>
-              Ajude a encontrar! Compartilhe este alerta 🙏 | sospet.vercel.app
             </div>
           </div>
         </div>
