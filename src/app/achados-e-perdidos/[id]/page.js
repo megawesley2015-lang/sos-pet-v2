@@ -3,9 +3,24 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
 import { getPetById } from "@/services/pets.service";
 import ShareCard from "@/components/ShareCard";
+
+// Importar componentes de mapa dinamicamente (SSR desabilitado)
+const PetMap = dynamic(() => import("@/components/Map/PetMap"), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-[400px] bg-gray-100 rounded-xl flex items-center justify-center">
+      <p className="text-gray-500">Carregando mapa...</p>
+    </div>
+  ),
+});
+
+const AddAvistamento = dynamic(() => import("@/components/Map/AddAvistamento"), { 
+  ssr: false,
+});
 
 const STATUS_CONFIG = {
   perdido: {
@@ -41,13 +56,26 @@ export default function PetDetalhes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [avistamentos, setAvistamentos] = useState([]);
+  const [showMap, setShowMap] = useState(false);
+
+  const fetchAvistamentos = async (petId) => {
+    const { data, error } = await supabase
+      .from("avistamentos")
+      .select("*")
+      .eq("pet_id", petId)
+      .order("data_avistamento", { ascending: true });
+
+    if (!error && data) {
+      setAvistamentos(data);
+    }
+  };
 
   useEffect(() => {
     async function fetchPet() {
       try {
         setLoading(true);
         
-        // Buscar pet
         const data = await getPetById(params.id);
         setPet(data);
 
@@ -56,6 +84,9 @@ export default function PetDetalhes() {
         if (session && data && session.user.id === data.user_id) {
           setIsOwner(true);
         }
+
+        // Buscar avistamentos
+        await fetchAvistamentos(params.id);
 
       } catch (err) {
         console.error("Erro ao carregar pet:", err);
@@ -69,6 +100,10 @@ export default function PetDetalhes() {
       fetchPet();
     }
   }, [params.id]);
+
+  const handleAvistamentoSuccess = () => {
+    fetchAvistamentos(params.id);
+  };
 
   if (loading) {
     return (
@@ -104,7 +139,7 @@ export default function PetDetalhes() {
     <main className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4">
         
-        {/* Header com navegação */}
+        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <Link 
             href="/achados-e-perdidos" 
@@ -113,7 +148,6 @@ export default function PetDetalhes() {
             ← Voltar para a lista
           </Link>
 
-          {/* Botão editar para o dono */}
           {isOwner && (
             <Link
               href={`/achados-e-perdidos/editar/${pet.id}`}
@@ -147,7 +181,7 @@ export default function PetDetalhes() {
               {statusConfig.label}
             </div>
 
-            {/* Nome e Info Básica */}
+            {/* Nome e Info */}
             <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
               {pet.nome || "Sem nome"}
             </h1>
@@ -163,10 +197,102 @@ export default function PetDetalhes() {
               <p className="font-medium">{statusConfig.description}</p>
             </div>
 
-            {/* 📸 SEÇÃO DE COMPARTILHAMENTO */}
+            {/* 🗺️ MAPA DE AVISTAMENTOS */}
+            {pet.status === "perdido" && (
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                    🗺️ Mapa de Avistamentos
+                    {avistamentos.length > 0 && (
+                      <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+                        {avistamentos.length} {avistamentos.length === 1 ? "local" : "locais"}
+                      </span>
+                    )}
+                  </h3>
+                  <button
+                    onClick={() => setShowMap(!showMap)}
+                    className="text-sm text-[#20B2AA] hover:underline"
+                  >
+                    {showMap ? "Ocultar mapa" : "Mostrar mapa"}
+                  </button>
+                </div>
+
+                {showMap && (
+                  <div className="space-y-4">
+                    <PetMap
+                      avistamentos={avistamentos}
+                      petInfo={pet}
+                      height="400px"
+                    />
+
+                    {/* Botão para adicionar avistamento */}
+                    <AddAvistamento
+                      petId={pet.id}
+                      petNome={pet.nome || "o pet"}
+                      onSuccess={handleAvistamentoSuccess}
+                    />
+
+                    {/* Lista de avistamentos */}
+                    {avistamentos.length > 0 && (
+                      <div className="bg-gray-50 rounded-xl p-4">
+                        <h4 className="font-bold text-gray-700 mb-3">📋 Histórico de Avistamentos</h4>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {avistamentos.slice().reverse().map((av, index) => (
+                            <div key={av.id} className="bg-white rounded-lg p-3 text-sm">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="text-gray-800">
+                                    {av.descricao || "Avistamento registrado"}
+                                  </p>
+                                  <p className="text-gray-400 text-xs mt-1">
+                                    📅 {new Date(av.data_avistamento).toLocaleDateString("pt-BR", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit"
+                                    })}
+                                  </p>
+                                </div>
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  av.tipo === "perdido" 
+                                    ? "bg-red-100 text-red-700" 
+                                    : av.tipo === "encontrado"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-blue-100 text-blue-700"
+                                }`}>
+                                  {av.tipo === "perdido" ? "Perdido" : 
+                                   av.tipo === "encontrado" ? "Encontrado" : "Avistado"}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!showMap && avistamentos.length === 0 && (
+                  <div className="bg-gray-50 rounded-xl p-6 text-center">
+                    <p className="text-gray-500 mb-3">
+                      Nenhum avistamento registrado ainda
+                    </p>
+                    <button
+                      onClick={() => setShowMap(true)}
+                      className="text-[#20B2AA] font-bold hover:underline"
+                    >
+                      Registrar primeiro avistamento →
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Compartilhar */}
             <ShareCard pet={pet} />
 
-            {/* Informações Detalhadas */}
+            {/* Informações */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="space-y-4">
                 <h3 className="font-bold text-gray-800 border-b pb-2">Informações do Pet</h3>
