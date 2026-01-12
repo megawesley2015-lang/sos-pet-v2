@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import PWAInstaller from "@/components/PWAInstaller";
+import EmergencyFAB from "@/components/FAB/EmergencyFAB";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,6 +92,7 @@ export default function RootLayout({ children }) {
         {children}
         <Footer />
         <PWAInstaller />
+        <EmergencyFAB />
       </body>
     </html>
   );
