@@ -1,10 +1,132 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+
+/**
+ * Hook para animação de contagem (count-up effect)
+ */
+function useCountUp(end, duration = 2000, start = false) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!start || end === 0) {
+      if (start) setCount(end);
+      return;
+    }
+    
+    let startTime = null;
+    const startValue = 0;
+
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const currentValue = Math.floor(easeOut * (end - startValue) + startValue);
+      setCount(currentValue);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [end, duration, start]);
+
+  return count;
+}
+
+/**
+ * Componente de estatística individual com animação
+ */
+function StatCard({ value, label, suffix = "+", isVisible }) {
+  const animatedValue = useCountUp(value, 2000, isVisible);
+  
+  return (
+    <div>
+      <div className="text-4xl md:text-5xl font-black mb-2">
+        {animatedValue.toLocaleString("pt-BR")}{suffix}
+      </div>
+      <div className="text-base md:text-lg font-semibold opacity-90">{label}</div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [stats, setStats] = useState({
+    prestadores: 0,
+    usuarios: 0,
+    petsReunidos: 0,
+    avaliacoes: 0,
+  });
+  const [statsVisible, setStatsVisible] = useState(false);
+  const statsRef = useRef(null);
+
+  // Intersection Observer para animar estatísticas quando visíveis
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !statsVisible) {
+          setStatsVisible(true);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [statsVisible]);
+
+  // Buscar estatísticas reais do banco
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        // Prestadores aprovados
+        const { count: prestadoresCount } = await supabase
+          .from("prestadores")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "aprovado");
+
+        // Total de pets cadastrados
+        const { count: petsCount } = await supabase
+          .from("pets")
+          .select("*", { count: "exact", head: true });
+
+        // Pets reencontrados
+        const { count: reunidosCount } = await supabase
+          .from("pets")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "encontrado");
+
+        // Avistamentos (como proxy de engajamento)
+        let avistamentosCount = 0;
+        try {
+          const { count } = await supabase
+            .from("avistamentos")
+            .select("*", { count: "exact", head: true });
+          avistamentosCount = count || 0;
+        } catch {
+          avistamentosCount = 0;
+        }
+
+        setStats({
+          prestadores: prestadoresCount || 0,
+          usuarios: petsCount || 0,
+          petsReunidos: reunidosCount || 0,
+          avaliacoes: avistamentosCount || 0,
+        });
+      } catch (error) {
+        console.error("Erro ao buscar estatísticas:", error);
+        // Mantém zeros se houver erro
+      }
+    }
+
+    fetchStats();
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -85,25 +207,25 @@ export default function HomePage() {
             <Link href="/prestadores?category=Veterinario" className="bg-gradient-to-br from-[#E0F7F6] to-[#B2DFDB] border-2 border-[#20B2AA]/30 p-8 rounded-3xl hover:shadow-xl transition-all hover:-translate-y-2 group">
               <div className="text-5xl md:text-6xl mb-4">🏥</div>
               <h3 className="text-xl md:text-2xl font-bold mb-2 text-gray-800 group-hover:text-[#20B2AA]">Veterinários</h3>
-              <p className="text-gray-600 text-sm">120+ prestadores</p>
+              <p className="text-gray-600 text-sm">Clínicas e profissionais</p>
             </Link>
 
             <Link href="/prestadores?category=Pet Shop" className="bg-gradient-to-br from-[#FFF3E0] to-[#FFE0B2] border-2 border-[#FF6B35]/30 p-8 rounded-3xl hover:shadow-xl transition-all hover:-translate-y-2 group">
               <div className="text-5xl md:text-6xl mb-4">🛍️</div>
               <h3 className="text-xl md:text-2xl font-bold mb-2 text-gray-800 group-hover:text-[#FF6B35]">Pet Shops</h3>
-              <p className="text-gray-600 text-sm">85+ prestadores</p>
+              <p className="text-gray-600 text-sm">Produtos e acessórios</p>
             </Link>
 
             <Link href="/prestadores?category=Hotel" className="bg-gradient-to-br from-[#E0F7F6] to-[#B2DFDB] border-2 border-[#20B2AA]/30 p-8 rounded-3xl hover:shadow-xl transition-all hover:-translate-y-2 group">
               <div className="text-5xl md:text-6xl mb-4">🏨</div>
               <h3 className="text-xl md:text-2xl font-bold mb-2 text-gray-800 group-hover:text-[#20B2AA]">Hotéis Pet</h3>
-              <p className="text-gray-600 text-sm">45+ prestadores</p>
+              <p className="text-gray-600 text-sm">Hospedagem segura</p>
             </Link>
 
             <Link href="/prestadores?category=Banho e Tosa" className="bg-gradient-to-br from-[#FFF3E0] to-[#FFE0B2] border-2 border-[#FF6B35]/30 p-8 rounded-3xl hover:shadow-xl transition-all hover:-translate-y-2 group">
               <div className="text-5xl md:text-6xl mb-4">✂️</div>
               <h3 className="text-xl md:text-2xl font-bold mb-2 text-gray-800 group-hover:text-[#FF6B35]">Banho e Tosa</h3>
-              <p className="text-gray-600 text-sm">95+ prestadores</p>
+              <p className="text-gray-600 text-sm">Estética e higiene</p>
             </Link>
           </div>
         </div>
@@ -218,26 +340,42 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ESTATÍSTICAS */}
-      <section className="py-20 px-4 bg-gradient-to-br from-[#FF6B35] to-[#FF8C5A] text-white">
+      {/* ESTATÍSTICAS COM DADOS REAIS */}
+      <section 
+        ref={statsRef}
+        className="py-20 px-4 bg-gradient-to-br from-[#FF6B35] to-[#FF8C5A] text-white"
+      >
         <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-black mb-4">
+              Fazendo a diferença juntos 🐾
+            </h2>
+            <p className="text-lg opacity-90">
+              Cada número representa uma história de amor e cuidado
+            </p>
+          </div>
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl md:text-5xl font-black mb-2">1.000+</div>
-              <div className="text-base md:text-lg font-semibold opacity-90">Prestadores Ativos</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-black mb-2">50.000+</div>
-              <div className="text-base md:text-lg font-semibold opacity-90">Tutores Cadastrados</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-black mb-2">10.000+</div>
-              <div className="text-base md:text-lg font-semibold opacity-90">Pets Reunidos</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-black mb-2">15.000+</div>
-              <div className="text-base md:text-lg font-semibold opacity-90">Avaliações Reais</div>
-            </div>
+            <StatCard 
+              value={stats.prestadores} 
+              label="Prestadores Parceiros" 
+              isVisible={statsVisible}
+            />
+            <StatCard 
+              value={stats.usuarios} 
+              label="Pets Cadastrados" 
+              isVisible={statsVisible}
+            />
+            <StatCard 
+              value={stats.petsReunidos} 
+              label="Reencontros Felizes" 
+              isVisible={statsVisible}
+            />
+            <StatCard 
+              value={stats.avaliacoes} 
+              label="Avistamentos Reportados" 
+              isVisible={statsVisible}
+            />
           </div>
         </div>
       </section>
