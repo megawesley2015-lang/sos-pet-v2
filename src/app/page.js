@@ -52,6 +52,44 @@ function StatCard({ value, label, suffix = "+", isVisible }) {
   );
 }
 
+/**
+ * Componente Ticker de Avisos
+ */
+function AnnouncementTicker({ avisos }) {
+  if (!avisos || avisos.length === 0) return null;
+
+  return (
+    <div className="bg-[#FF6B35] text-white py-2 overflow-hidden">
+      <div className="animate-ticker flex whitespace-nowrap">
+        {[...avisos, ...avisos].map((aviso, index) => (
+          <span key={index} className="mx-8 flex items-center gap-2">
+            <span>{aviso.emoji || "📢"}</span>
+            <span className="font-medium">{aviso.mensagem}</span>
+            {aviso.link && (
+              <Link href={aviso.link} className="underline ml-2 hover:text-white/80">
+                Saiba mais →
+              </Link>
+            )}
+          </span>
+        ))}
+      </div>
+      
+      <style jsx>{`
+        @keyframes ticker {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-ticker {
+          animation: ticker 30s linear infinite;
+        }
+        .animate-ticker:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState({
@@ -60,6 +98,7 @@ export default function HomePage() {
     petsReunidos: 0,
     avaliacoes: 0,
   });
+  const [avisos, setAvisos] = useState([]);
   const [statsVisible, setStatsVisible] = useState(false);
   const statsRef = useRef(null);
 
@@ -85,24 +124,20 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        // Prestadores aprovados
         const { count: prestadoresCount } = await supabase
           .from("prestadores")
           .select("*", { count: "exact", head: true })
           .eq("status", "aprovado");
 
-        // Total de pets cadastrados
         const { count: petsCount } = await supabase
           .from("pets")
           .select("*", { count: "exact", head: true });
 
-        // Pets reencontrados
         const { count: reunidosCount } = await supabase
           .from("pets")
           .select("*", { count: "exact", head: true })
           .eq("status", "encontrado");
 
-        // Avistamentos (como proxy de engajamento)
         let avistamentosCount = 0;
         try {
           const { count } = await supabase
@@ -121,11 +156,41 @@ export default function HomePage() {
         });
       } catch (error) {
         console.error("Erro ao buscar estatísticas:", error);
-        // Mantém zeros se houver erro
       }
     }
 
     fetchStats();
+  }, []);
+
+  // Buscar avisos ativos
+  useEffect(() => {
+    async function fetchAvisos() {
+      try {
+        const { data } = await supabase
+          .from("avisos")
+          .select("*")
+          .eq("ativo", true)
+          .order("created_at", { ascending: false })
+          .limit(5);
+        
+        if (data && data.length > 0) {
+          setAvisos(data);
+        } else {
+          // Avisos padrão se não houver no banco
+          setAvisos([
+            { emoji: "🐾", mensagem: "Bem-vindo ao SOS Pet! Ajudando pets na Baixada Santista" },
+            { emoji: "🚨", mensagem: "Perdeu seu pet? Cadastre agora e receba ajuda da comunidade", link: "/achados-e-perdidos/cadastrar" },
+            { emoji: "🤝", mensagem: "ONGs: tornem-se parceiros AUmigos!", link: "/parcerias" },
+          ]);
+        }
+      } catch {
+        setAvisos([
+          { emoji: "🐾", mensagem: "Bem-vindo ao SOS Pet! Ajudando pets na Baixada Santista" },
+        ]);
+      }
+    }
+
+    fetchAvisos();
   }, []);
 
   const handleSearch = (e) => {
@@ -135,12 +200,47 @@ export default function HomePage() {
     }
   };
 
+  /**
+   * Badges funcionais - cada um filtra prestadores
+   */
+  const heroBadges = [
+    {
+      emoji: "⚡",
+      label: "Emergência 24h",
+      href: "/prestadores?emergencia24h=true",
+      color: "bg-red-500/20 border-red-400/50",
+    },
+    {
+      emoji: "🚚",
+      label: "Delivery Disponível",
+      href: "/prestadores?delivery=true",
+      color: "bg-blue-500/20 border-blue-400/50",
+    },
+    {
+      emoji: "✓",
+      label: "Profissionais Verificados",
+      href: "/prestadores?verificado=true",
+      color: "bg-green-500/20 border-green-400/50",
+    },
+    {
+      emoji: "📅",
+      label: "Agendamento Online",
+      href: "/prestadores?agendamento=true",
+      color: "bg-purple-500/20 border-purple-400/50",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-white">
       
+      {/* Ticker de Avisos */}
+      <div className="pt-20">
+        <AnnouncementTicker avisos={avisos} />
+      </div>
+      
       {/* HERO SECTION */}
-      <section className="relative bg-gradient-to-br from-[#20B2AA] to-[#1a9e97] min-h-[600px] flex items-center justify-center">
-        <div className="max-w-5xl mx-auto px-4 text-center py-16">
+      <section className="relative bg-gradient-to-br from-[#20B2AA] to-[#1a9e97] min-h-[550px] flex items-center justify-center">
+        <div className="max-w-5xl mx-auto px-4 text-center py-12">
           
           {/* Logo */}
           <div className="mb-8">
@@ -151,7 +251,7 @@ export default function HomePage() {
               </h1>
             </div>
             <p className="text-xl md:text-2xl text-white font-semibold opacity-95">
-              Encontre os melhores serviços para seu pet
+              Encontre os melhores serviços para seu pet na Baixada Santista
             </p>
           </div>
 
@@ -177,26 +277,46 @@ export default function HomePage() {
             </div>
           </form>
 
-          {/* Badges */}
+          {/* Badges Funcionais */}
           <div className="flex flex-wrap justify-center gap-3">
-            <span className="bg-white/20 backdrop-blur-sm border-2 border-white/40 px-5 py-2.5 rounded-full text-white font-bold text-sm">
-              ⚡ Emergência 24h
-            </span>
-            <span className="bg-white/20 backdrop-blur-sm border-2 border-white/40 px-5 py-2.5 rounded-full text-white font-bold text-sm">
-              🚚 Delivery Disponível
-            </span>
-            <span className="bg-white/20 backdrop-blur-sm border-2 border-white/40 px-5 py-2.5 rounded-full text-white font-bold text-sm">
-              ✓ Profissionais Verificados
-            </span>
-            <span className="bg-white/20 backdrop-blur-sm border-2 border-white/40 px-5 py-2.5 rounded-full text-white font-bold text-sm">
-              📅 Agendamento Online
-            </span>
+            {heroBadges.map((badge, index) => (
+              <Link
+                key={index}
+                href={badge.href}
+                className={`${badge.color} backdrop-blur-sm border-2 px-5 py-2.5 rounded-full text-white font-bold text-sm hover:scale-105 transition-all hover:shadow-lg`}
+              >
+                {badge.emoji} {badge.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* COBERTURA BAIXADA SANTISTA */}
+      <section className="py-8 px-4 bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🗺️</span>
+              <div>
+                <h2 className="font-bold text-gray-800">Cobertura: Baixada Santista</h2>
+                <p className="text-sm text-gray-500">
+                  Santos • Guarujá • Praia Grande • São Vicente • Cubatão • Bertioga • Mongaguá • Itanhaém • Peruíbe
+                </p>
+              </div>
+            </div>
+            <Link 
+              href="/achados-e-perdidos"
+              className="text-[#20B2AA] hover:text-[#1a9e97] font-bold text-sm flex items-center gap-1"
+            >
+              Ver pets da região →
+            </Link>
           </div>
         </div>
       </section>
 
       {/* CATEGORIAS */}
-      <section className="py-20 px-4">
+      <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black text-center mb-12 text-gray-800">
             O que você procura?
@@ -231,13 +351,75 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* AÇÕES RÁPIDAS */}
+      <section className="py-12 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Achados e Perdidos */}
+            <Link 
+              href="/achados-e-perdidos"
+              className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-3xl p-8 hover:shadow-xl transition-all hover:-translate-y-1 group"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-4xl">🔍</span>
+                <div>
+                  <h3 className="text-xl font-black text-gray-800 group-hover:text-red-600">Achados e Perdidos</h3>
+                  <p className="text-sm text-gray-500">Toda Baixada Santista</p>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm mb-4">
+                Perdeu ou encontrou um pet? A comunidade pode ajudar!
+              </p>
+              <span className="text-red-600 font-bold text-sm">Ver pets →</span>
+            </Link>
+
+            {/* Emergência */}
+            <Link 
+              href="/prestadores?emergencia24h=true"
+              className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-3xl p-8 hover:shadow-xl transition-all hover:-translate-y-1 group"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-4xl">🚨</span>
+                <div>
+                  <h3 className="text-xl font-black text-gray-800 group-hover:text-orange-600">Emergência 24h</h3>
+                  <p className="text-sm text-gray-500">Atendimento urgente</p>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm mb-4">
+                Clínicas veterinárias com atendimento 24 horas
+              </p>
+              <span className="text-orange-600 font-bold text-sm">Ver clínicas →</span>
+            </Link>
+
+            {/* Parcerias */}
+            <Link 
+              href="/parcerias"
+              className="bg-gradient-to-br from-[#E0F7F6] to-[#B2DFDB] border-2 border-[#20B2AA]/30 rounded-3xl p-8 hover:shadow-xl transition-all hover:-translate-y-1 group"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-4xl">🤝</span>
+                <div>
+                  <h3 className="text-xl font-black text-gray-800 group-hover:text-[#20B2AA]">Seja Parceiro</h3>
+                  <p className="text-sm text-gray-500">ONGs e Protetores</p>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm mb-4">
+                Junte-se ao SOS Pet e ajude a salvar vidas
+              </p>
+              <span className="text-[#20B2AA] font-bold text-sm">Saiba mais →</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* PRESTADORES DESTAQUE */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-16 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-4">
             <div>
               <h2 className="text-3xl md:text-4xl font-black mb-2 text-gray-800">Prestadores em Destaque</h2>
-              <p className="text-lg md:text-xl text-gray-600">Os melhores avaliados</p>
+              <p className="text-lg md:text-xl text-gray-600">Os melhores avaliados da região</p>
             </div>
             <Link href="/prestadores" className="bg-[#FF6B35] hover:bg-[#e85a2a] text-white px-8 py-4 rounded-xl font-bold transition-all hover:shadow-lg">
               Ver Todos →
@@ -253,7 +435,7 @@ export default function HomePage() {
                 <span className="bg-[#FF6B35]/10 text-[#FF6B35] text-xs font-bold px-3 py-1 rounded-full">⚡ 24h</span>
               </div>
               <h3 className="text-xl md:text-2xl font-black mb-2 text-gray-800">Clínica Veterinária Guarujá</h3>
-              <p className="text-sm text-gray-500 mb-3">Veterinário</p>
+              <p className="text-sm text-gray-500 mb-3">Veterinário • Guarujá</p>
               <p className="text-gray-600 text-sm mb-4">Clínica completa com mais de 12 anos de experiência</p>
               <div className="flex items-center gap-2">
                 <span className="text-yellow-500 text-xl">⭐</span>
@@ -266,9 +448,10 @@ export default function HomePage() {
               <div className="text-6xl md:text-7xl mb-6">🛍️</div>
               <div className="flex gap-2 mb-4">
                 <span className="bg-[#20B2AA]/10 text-[#20B2AA] text-xs font-bold px-3 py-1 rounded-full">✓ Verificado</span>
+                <span className="bg-blue-100 text-blue-600 text-xs font-bold px-3 py-1 rounded-full">🚚 Delivery</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-black mb-2 text-gray-800">Pet Shop Praia</h3>
-              <p className="text-sm text-gray-500 mb-3">Pet Shop</p>
+              <h3 className="text-xl md:text-2xl font-black mb-2 text-gray-800">Pet Shop Praia Grande</h3>
+              <p className="text-sm text-gray-500 mb-3">Pet Shop • Praia Grande</p>
               <p className="text-gray-600 text-sm mb-4">Produtos premium e acessórios para todos os pets</p>
               <div className="flex items-center gap-2">
                 <span className="text-yellow-500 text-xl">⭐</span>
@@ -281,10 +464,10 @@ export default function HomePage() {
               <div className="text-6xl md:text-7xl mb-6">🏨</div>
               <div className="flex gap-2 mb-4 flex-wrap">
                 <span className="bg-[#20B2AA]/10 text-[#20B2AA] text-xs font-bold px-3 py-1 rounded-full">✓ Verificado</span>
-                <span className="bg-[#FF6B35]/10 text-[#FF6B35] text-xs font-bold px-3 py-1 rounded-full">⚡ 24h</span>
+                <span className="bg-purple-100 text-purple-600 text-xs font-bold px-3 py-1 rounded-full">📅 Agenda</span>
               </div>
               <h3 className="text-xl md:text-2xl font-black mb-2 text-gray-800">Hotel Pet Paraíso</h3>
-              <p className="text-sm text-gray-500 mb-3">Hotel</p>
+              <p className="text-sm text-gray-500 mb-3">Hotel • Santos</p>
               <p className="text-gray-600 text-sm mb-4">Hospedagem 5 estrelas com área de recreação</p>
               <div className="flex items-center gap-2">
                 <span className="text-yellow-500 text-xl">⭐</span>
@@ -296,57 +479,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ACHADOS E PERDIDOS */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-800">Achados e Perdidos</h2>
-          <p className="text-lg md:text-xl text-gray-600 mb-8">Ajude a reunir pets com suas famílias</p>
-          
-          <Link href="/achados-e-perdidos" className="inline-block bg-[#FF6B35] hover:bg-[#e85a2a] text-white px-10 py-5 rounded-xl font-bold text-lg mb-12 transition-all hover:shadow-lg">
-            📢 Reportar Animal
-          </Link>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-            <div className="bg-white border-2 border-gray-100 rounded-3xl p-8 hover:shadow-xl transition-all">
-              <div className="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full inline-block mb-4">
-                ❌ PERDIDO
-              </div>
-              <div className="text-5xl md:text-6xl mb-6">🐕</div>
-              <h3 className="text-xl md:text-2xl font-black mb-3 text-gray-800">Bolinha</h3>
-              <p className="text-sm text-gray-600 mb-2">Cão - Poodle</p>
-              <p className="text-sm text-gray-500">📍 Enseada, Guarujá</p>
-            </div>
-
-            <div className="bg-white border-2 border-gray-100 rounded-3xl p-8 hover:shadow-xl transition-all">
-              <div className="bg-green-100 text-green-600 text-xs font-bold px-3 py-1 rounded-full inline-block mb-4">
-                ✓ ENCONTRADO
-              </div>
-              <div className="text-5xl md:text-6xl mb-6">🐈</div>
-              <h3 className="text-xl md:text-2xl font-black mb-3 text-gray-800">Miau</h3>
-              <p className="text-sm text-gray-600 mb-2">Gato - Siamês</p>
-              <p className="text-sm text-gray-500">📍 Pitangueiras, Guarujá</p>
-            </div>
-
-            <div className="bg-white border-2 border-gray-100 rounded-3xl p-8 hover:shadow-xl transition-all">
-              <div className="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full inline-block mb-4">
-                ❌ PERDIDO
-              </div>
-              <div className="text-5xl md:text-6xl mb-6">🐕</div>
-              <h3 className="text-xl md:text-2xl font-black mb-3 text-gray-800">Max</h3>
-              <p className="text-sm text-gray-600 mb-2">Cão - Labrador</p>
-              <p className="text-sm text-gray-500">📍 Astúrias, Guarujá</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ESTATÍSTICAS COM DADOS REAIS */}
       <section 
         ref={statsRef}
-        className="py-20 px-4 bg-gradient-to-br from-[#FF6B35] to-[#FF8C5A] text-white"
+        className="py-16 px-4 bg-gradient-to-br from-[#FF6B35] to-[#FF8C5A] text-white"
       >
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-black mb-4">
               Fazendo a diferença juntos 🐾
             </h2>
@@ -381,7 +520,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-20 px-4">
+      <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="bg-gradient-to-br from-[#20B2AA] to-[#1a9e97] rounded-3xl p-10 md:p-16 text-center text-white">
             <h2 className="text-3xl md:text-5xl font-black mb-6">
