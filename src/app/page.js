@@ -267,6 +267,17 @@ export default function HomePage() {
           100% { background-position: 0% 50%; }
         }
         
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes ping-slow {
+          0% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.1); opacity: 0.4; }
+          100% { transform: scale(1); opacity: 0.8; }
+        }
+        
         .animate-fadeInUp {
           animation: fadeInUp 0.6s ease-out forwards;
           opacity: 0;
@@ -283,6 +294,14 @@ export default function HomePage() {
         .bg-gradient-animated {
           background-size: 200% 200%;
           animation: gradient-shift 8s ease infinite;
+        }
+        
+        .animate-spin-slow {
+          animation: spin-slow 8s linear infinite;
+        }
+        
+        .animate-ping-slow {
+          animation: ping-slow 2s ease-in-out infinite;
         }
       `}</style>
 
@@ -385,7 +404,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Content - Phone Mockup */}
+            {/* Right Content - Phone Mockup with Central Button */}
             <div className="relative flex justify-center animate-fadeInUp" style={{ animationDelay: '500ms' }}>
               {/* Glow Effect Behind Phone */}
               <div className="absolute inset-0 flex items-center justify-center">
@@ -434,54 +453,95 @@ export default function HomePage() {
                       <div className="h-6 bg-slate-900 flex justify-center items-end pb-1">
                         <div className="w-20 h-4 bg-slate-800 rounded-full"></div>
                       </div>
-                      {/* Screen Content */}
-                      <div className="h-[400px] md:h-[450px] bg-gradient-to-b from-slate-800 to-slate-900 p-4">
-                        {/* App Header */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">🐾</span>
-                            <span className="text-white font-bold">SOS Pet</span>
+                      {/* Screen Content - Central Button Design */}
+                      <div className="h-[400px] md:h-[450px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center relative overflow-hidden">
+                        
+                        {/* Background Circuit Lines */}
+                        <div className="absolute inset-0 opacity-20">
+                          <svg className="w-full h-full" viewBox="0 0 300 450">
+                            <defs>
+                              <linearGradient id="circuit-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#06b6d4" />
+                                <stop offset="100%" stopColor="#f97316" />
+                              </linearGradient>
+                            </defs>
+                            {/* Horizontal lines */}
+                            <line x1="0" y1="100" x2="300" y2="100" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
+                            <line x1="0" y1="200" x2="300" y2="200" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
+                            <line x1="0" y1="300" x2="300" y2="300" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
+                            {/* Vertical lines */}
+                            <line x1="75" y1="0" x2="75" y2="450" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
+                            <line x1="150" y1="0" x2="150" y2="450" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
+                            <line x1="225" y1="0" x2="225" y2="450" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
+                            {/* Dots */}
+                            <circle cx="75" cy="100" r="3" fill="#06b6d4" />
+                            <circle cx="225" cy="100" r="3" fill="#f97316" />
+                            <circle cx="75" cy="300" r="3" fill="#f97316" />
+                            <circle cx="225" cy="300" r="3" fill="#06b6d4" />
+                          </svg>
+                        </div>
+
+                        {/* Central Paw Button - Main Feature */}
+                        <Link href="/meus-pets" className="relative group">
+                          {/* Outer Glow Ring */}
+                          <div className="absolute -inset-8 rounded-full opacity-60">
+                            <div className="w-full h-full rounded-full bg-gradient-to-r from-cyan-500 via-orange-500 to-cyan-500 animate-spin-slow opacity-30 blur-md"></div>
                           </div>
-                          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">🔔</span>
+                          
+                          {/* Animated Ring */}
+                          <div className="absolute -inset-6 rounded-full border-2 border-cyan-500/50 animate-ping-slow"></div>
+                          <div className="absolute -inset-4 rounded-full border border-orange-500/30"></div>
+                          
+                          {/* Main Button */}
+                          <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-cyan-500/50 flex items-center justify-center shadow-2xl shadow-cyan-500/20 group-hover:shadow-orange-500/30 transition-all duration-500 group-hover:scale-110">
+                            {/* Inner Glow */}
+                            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-orange-500/20 to-cyan-500/20 blur-sm"></div>
+                            
+                            {/* Paw Icon */}
+                            <div className="relative flex flex-col items-center">
+                              <span className="text-5xl md:text-6xl filter drop-shadow-lg">🐾</span>
+                            </div>
+                            
+                            {/* Corner Accent */}
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-400 rounded-full animate-pulse shadow-lg shadow-cyan-400/50"></div>
+                          </div>
+                        </Link>
+
+                        {/* Button Label */}
+                        <div className="mt-6 text-center">
+                          <p className="text-white font-bold text-lg">Meus Pets</p>
+                          <p className="text-cyan-400 text-xs mt-1">Acesse o perfil dos seus pets</p>
+                        </div>
+
+                        {/* Bottom Action */}
+                        <div className="absolute bottom-8 left-0 right-0 px-6">
+                          <div className="bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-700">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+                                  <span>🔔</span>
+                                </div>
+                                <div>
+                                  <p className="text-white text-sm font-bold">Home do Tutor</p>
+                                  <p className="text-gray-400 text-xs">Vacinas • Perfil • Alertas</p>
+                                </div>
+                              </div>
+                              <div className="text-cyan-400">→</div>
+                            </div>
                           </div>
                         </div>
-                        
-                        {/* Search */}
-                        <div className="bg-slate-700/50 rounded-xl p-3 mb-4 flex items-center gap-2">
-                          <span className="text-gray-500">🔍</span>
-                          <span className="text-gray-500 text-sm">Buscar serviços...</span>
-                        </div>
-                        
-                        {/* Quick Actions */}
-                        <div className="grid grid-cols-4 gap-2 mb-4">
-                          {['🏥', '🛍️', '✂️', '🏨'].map((icon, i) => (
-                            <div key={i} className="bg-slate-700/50 rounded-xl p-3 flex items-center justify-center">
-                              <span className="text-xl">{icon}</span>
+
+                        {/* Top Status Bar */}
+                        <div className="absolute top-4 left-0 right-0 px-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">🐾</span>
+                              <span className="text-white text-sm font-bold">SOS Pet</span>
                             </div>
-                          ))}
-                        </div>
-                        
-                        {/* Alert Card */}
-                        <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl p-3 mb-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span>🚨</span>
-                            <span className="text-white font-bold text-sm">Alerta Ativo</span>
-                          </div>
-                          <p className="text-gray-400 text-xs">Luna - Labrador perdida em Santos</p>
-                        </div>
-                        
-                        {/* Featured */}
-                        <div className="bg-slate-700/30 rounded-xl p-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center">
-                              <span className="text-2xl">🏥</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <span className="text-green-400 text-xs">Online</span>
                             </div>
-                            <div className="flex-1">
-                              <p className="text-white font-bold text-sm">Clínica VetLife</p>
-                              <p className="text-gray-500 text-xs">24h • 2.5km</p>
-                            </div>
-                            <div className="text-yellow-500 text-sm">⭐ 4.9</div>
                           </div>
                         </div>
                       </div>
