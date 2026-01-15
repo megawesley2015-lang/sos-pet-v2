@@ -6,13 +6,10 @@ import { supabase } from "@/lib/supabase";
 import { logout } from "@/services/auth.service";
 
 /**
- * Header Principal do SOS Pet
+ * Header Dark Theme - SOS Pet
  * 
- * Estrutura de navegação:
- * - Menu principal com itens padrão
- * - Modal "Como Funciona" com 3 passos
- * - Botões de destaque: Emergência (laranja) e Sou Profissional (verde água)
- * - Menu mobile responsivo com todos os itens
+ * Header com tema escuro/transparente para combinar com a landing page premium.
+ * Suporta scroll-based transparency e animações suaves.
  * 
  * @returns {JSX.Element}
  */
@@ -22,6 +19,16 @@ export default function Header() {
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Detectar scroll para mudar transparência do header
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const getSession = async () => {
@@ -82,27 +89,18 @@ export default function Header() {
     window.location.href = "/";
   };
 
-  /**
-   * Abre o FAB de emergência (se existir no DOM)
-   * Fallback: redireciona para prestadores com filtro de emergência
-   */
   const handleEmergencyClick = useCallback(() => {
-    // Tenta encontrar e clicar no FAB
     const fabButton = document.querySelector(".fab-container button");
     if (fabButton) {
       fabButton.click();
     } else {
-      // Fallback: redireciona para prestadores com emergência
-      window.location.href = "/prestadores?emergencia=true";
+      window.location.href = "/prestadores?emergencia24h=true";
     }
     setMobileMenuOpen(false);
   }, []);
 
   const userName = user?.user_metadata?.nome || user?.email?.split("@")[0] || "Usuário";
 
-  /**
-   * Itens do menu principal
-   */
   const menuItems = [
     { href: "/", label: "Início" },
     { href: "/achados-e-perdidos", label: "Achados e Perdidos" },
@@ -114,14 +112,22 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled 
+            ? "bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-lg" 
+            : "bg-transparent"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-20">
             
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-3xl">🐾</span>
-              <span className="text-2xl font-black text-[#FF6B35]">SOS Pet</span>
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
+              <span className="text-3xl group-hover:scale-110 transition-transform">🐾</span>
+              <span className="text-2xl font-black bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">
+                SOS Pet
+              </span>
             </Link>
 
             {/* Desktop Nav */}
@@ -131,17 +137,19 @@ export default function Header() {
                   <button
                     key={item.label}
                     onClick={item.onClick}
-                    className="text-gray-700 hover:text-[#20B2AA] font-semibold transition-colors"
+                    className="text-gray-300 hover:text-white font-medium transition-colors relative group"
                   >
                     {item.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-400 to-cyan-400 group-hover:w-full transition-all duration-300"></span>
                   </button>
                 ) : (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-gray-700 hover:text-[#20B2AA] font-semibold transition-colors"
+                    className="text-gray-300 hover:text-white font-medium transition-colors relative group"
                   >
                     {item.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-400 to-cyan-400 group-hover:w-full transition-all duration-300"></span>
                   </Link>
                 )
               ))}
@@ -149,39 +157,39 @@ export default function Header() {
 
             {/* Desktop Action Buttons */}
             <div className="hidden lg:flex items-center gap-3">
-              {/* Botão Emergência - Laranja */}
+              {/* Botão Emergência */}
               <button
                 onClick={handleEmergencyClick}
-                className="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all hover:shadow-lg flex items-center gap-2"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold transition-all hover:shadow-lg hover:shadow-orange-500/25 flex items-center gap-2"
                 aria-label="Emergência 24 horas"
               >
                 🚨 Emergência
               </button>
 
-              {/* Botão Sou Profissional - Verde Água */}
+              {/* Botão Sou Profissional */}
               <Link
                 href="/cadastro"
-                className="px-4 py-2 rounded-lg bg-[#20B2AA] hover:bg-[#1a9e97] text-white font-bold transition-all hover:shadow-lg"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-bold transition-all hover:shadow-lg hover:shadow-cyan-500/25"
               >
                 Sou Profissional
               </Link>
 
               {/* Auth Area */}
               {loading ? (
-                <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="w-10 h-10 bg-slate-700 rounded-full animate-pulse"></div>
               ) : user ? (
                 <div className="relative user-dropdown">
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800/50 transition-all"
                     aria-expanded={dropdownOpen}
                     aria-haspopup="true"
                   >
-                    <div className="w-9 h-9 bg-[#20B2AA] rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
                       {userName.charAt(0).toUpperCase()}
                     </div>
                     <svg
-                      className={`w-4 h-4 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                      className={`w-4 h-4 text-gray-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -191,29 +199,35 @@ export default function Header() {
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 animate-fadeIn">
-                      <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="font-semibold text-gray-800">{userName}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    <div className="absolute right-0 mt-2 w-52 bg-slate-800 rounded-xl shadow-lg border border-slate-700 py-2 animate-fadeIn">
+                      <div className="px-4 py-2 border-b border-slate-700">
+                        <p className="font-semibold text-white">{userName}</p>
+                        <p className="text-xs text-gray-400 truncate">{user.email}</p>
                       </div>
                       <Link
                         href="/meus-pets"
-                        className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                        className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-slate-700 hover:text-white"
                         onClick={() => setDropdownOpen(false)}
                       >
                         🐾 Meus Pets
                       </Link>
                       <Link
                         href="/perfil"
-                        className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                        className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-slate-700 hover:text-white"
                         onClick={() => setDropdownOpen(false)}
                       >
                         👤 Meu Perfil
                       </Link>
-                      <hr className="my-2 border-gray-100" />
+                      <Link
+                        href="/dashboard-prestador"
+                        className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-slate-700 hover:text-white"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        📊 Dashboard
+                      </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-red-500/10"
                       >
                         🚪 Sair
                       </button>
@@ -223,7 +237,7 @@ export default function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="px-5 py-2 rounded-lg border-2 border-[#FF6B35] text-[#FF6B35] font-bold hover:bg-[#FF6B35] hover:text-white transition-all"
+                  className="px-4 py-2 rounded-lg border border-slate-600 hover:border-slate-500 text-white font-medium hover:bg-slate-800/50 transition-all"
                 >
                   Entrar
                 </Link>
@@ -232,39 +246,44 @@ export default function Header() {
 
             {/* Mobile Menu Button */}
             <button
+              className="lg:hidden w-10 h-10 flex items-center justify-center text-white"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
               aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={mobileMenuOpen}
             >
-              <div className="w-6 h-5 flex flex-col justify-between">
-                <span
-                  className={`block h-0.5 bg-gray-700 transition-all duration-300 ${
-                    mobileMenuOpen ? "rotate-45 translate-y-2" : ""
-                  }`}
-                />
-                <span
-                  className={`block h-0.5 bg-gray-700 transition-all duration-300 ${
-                    mobileMenuOpen ? "opacity-0" : ""
-                  }`}
-                />
-                <span
-                  className={`block h-0.5 bg-gray-700 transition-all duration-300 ${
-                    mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
-                  }`}
-                />
-              </div>
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Menu */}
+      {/* Mobile Menu */}
+      <div
+        className={`fixed inset-0 z-40 lg:hidden transition-all duration-300 ${
+          mobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
+      >
+        {/* Overlay */}
         <div
-          className={`lg:hidden fixed inset-x-0 top-20 bottom-0 bg-white z-40 transition-all duration-300 ${
-            mobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+
+        {/* Menu Content */}
+        <div
+          className={`absolute top-0 right-0 w-full max-w-sm h-full bg-slate-900 border-l border-slate-800 transform transition-transform duration-300 ${
+            mobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="h-full overflow-y-auto px-4 py-6">
+          <div className="p-6 pt-24 h-full overflow-y-auto">
             <nav className="flex flex-col gap-1">
               {menuItems.map((item) => (
                 item.onClick ? (
@@ -274,7 +293,7 @@ export default function Header() {
                       item.onClick();
                       setMobileMenuOpen(false);
                     }}
-                    className="px-4 py-3 text-left hover:bg-gray-50 font-semibold rounded-lg text-gray-700"
+                    className="px-4 py-3 text-left hover:bg-slate-800 font-semibold rounded-lg text-gray-300 hover:text-white"
                   >
                     {item.label}
                   </button>
@@ -282,7 +301,7 @@ export default function Header() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="px-4 py-3 hover:bg-gray-50 font-semibold rounded-lg text-gray-700"
+                    className="px-4 py-3 hover:bg-slate-800 font-semibold rounded-lg text-gray-300 hover:text-white"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.label}
@@ -295,14 +314,14 @@ export default function Header() {
             <div className="mt-6 space-y-3">
               <button
                 onClick={handleEmergencyClick}
-                className="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold text-lg flex items-center justify-center gap-2"
               >
                 🚨 Emergência 24h
               </button>
 
               <Link
                 href="/cadastro"
-                className="block w-full py-4 rounded-xl bg-[#20B2AA] hover:bg-[#1a9e97] text-white font-bold text-lg text-center"
+                className="block w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 text-white font-bold text-lg text-center"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Sou Profissional
@@ -310,35 +329,42 @@ export default function Header() {
             </div>
 
             {/* Mobile Auth */}
-            <div className="mt-6 pt-6 border-t border-gray-100">
+            <div className="mt-6 pt-6 border-t border-slate-800">
               {user ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 px-4 py-2">
-                    <div className="w-10 h-10 bg-[#20B2AA] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
                       {userName.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800">{userName}</p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
+                      <p className="font-semibold text-white">{userName}</p>
+                      <p className="text-sm text-gray-400">{user.email}</p>
                     </div>
                   </div>
                   <Link
                     href="/meus-pets"
-                    className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg"
+                    className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:bg-slate-800 rounded-lg"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     🐾 Meus Pets
                   </Link>
                   <Link
                     href="/perfil"
-                    className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg"
+                    className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:bg-slate-800 rounded-lg"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     👤 Meu Perfil
                   </Link>
+                  <Link
+                    href="/dashboard-prestador"
+                    className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:bg-slate-800 rounded-lg"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    📊 Dashboard
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg"
+                    className="w-full flex items-center gap-2 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg"
                   >
                     🚪 Sair da conta
                   </button>
@@ -346,7 +372,7 @@ export default function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="block w-full py-4 rounded-xl bg-[#FF6B35] hover:bg-[#e85a2a] text-white font-bold text-lg text-center"
+                  className="block w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-lg text-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Entrar na minha conta
@@ -355,9 +381,9 @@ export default function Header() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Modal "Como Funciona" */}
+      {/* Modal "Como Funciona" - Dark Theme */}
       {showHowItWorks && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
@@ -367,19 +393,22 @@ export default function Header() {
         >
           {/* Overlay */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setShowHowItWorks(false)}
           />
 
           {/* Modal Content */}
-          <div className="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-modalIn">
+          <div className="relative bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-modalIn">
+            {/* Glow Effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 via-purple-500 to-cyan-500 rounded-3xl opacity-20 blur-xl -z-10"></div>
+            
             {/* Close Button */}
             <button
               onClick={() => setShowHowItWorks(false)}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors"
               aria-label="Fechar"
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -387,43 +416,43 @@ export default function Header() {
             {/* Header */}
             <div className="text-center mb-8">
               <span className="text-5xl mb-4 block">🐾</span>
-              <h2 id="how-it-works-title" className="text-2xl md:text-3xl font-black text-gray-800">
-                Como funciona o SOS Pet?
+              <h2 id="how-it-works-title" className="text-2xl md:text-3xl font-black text-white">
+                Como funciona o <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-cyan-400">SOS Pet</span>?
               </h2>
-              <p className="text-gray-500 mt-2">Simples, rápido e feito para ajudar</p>
+              <p className="text-gray-400 mt-2">Simples, rápido e feito para ajudar</p>
             </div>
 
             {/* Steps */}
             <div className="grid md:grid-cols-3 gap-6">
               {/* Step 1 */}
-              <div className="text-center p-4">
-                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="text-center p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50">
+                <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">📝</span>
                 </div>
-                <h3 className="font-bold text-lg text-gray-800 mb-2">1. Cadastre</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="font-bold text-lg text-white mb-2">1. Cadastre</h3>
+                <p className="text-gray-400 text-sm">
                   Registre seu pet perdido ou serviço em menos de 2 minutos
                 </p>
               </div>
 
               {/* Step 2 */}
-              <div className="text-center p-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="text-center p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50">
+                <div className="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">🔍</span>
                 </div>
-                <h3 className="font-bold text-lg text-gray-800 mb-2">2. Localize</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="font-bold text-lg text-white mb-2">2. Localize</h3>
+                <p className="text-gray-400 text-sm">
                   Use nossos filtros inteligentes para encontrar o que precisa
                 </p>
               </div>
 
               {/* Step 3 */}
-              <div className="text-center p-4">
-                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="text-center p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50">
+                <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">💬</span>
                 </div>
-                <h3 className="font-bold text-lg text-gray-800 mb-2">3. Conecte-se</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="font-bold text-lg text-white mb-2">3. Conecte-se</h3>
+                <p className="text-gray-400 text-sm">
                   Fale direto pelo WhatsApp com quem pode ajudar
                 </p>
               </div>
@@ -433,14 +462,14 @@ export default function Header() {
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/achados-e-perdidos"
-                className="px-6 py-3 bg-[#FF6B35] hover:bg-[#e85a2a] text-white font-bold rounded-xl text-center transition-all"
+                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl text-center transition-all"
                 onClick={() => setShowHowItWorks(false)}
               >
                 🔍 Buscar Pet
               </Link>
               <Link
                 href="/prestadores"
-                className="px-6 py-3 bg-[#20B2AA] hover:bg-[#1a9e97] text-white font-bold rounded-xl text-center transition-all"
+                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-bold rounded-xl text-center transition-all"
                 onClick={() => setShowHowItWorks(false)}
               >
                 🏥 Ver Serviços
