@@ -3,208 +3,29 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { 
+  PainPointCard, 
+  StatCard, 
+  TestimonialCard, 
+  CompareItem, 
+  PhoneMockup 
+} from "./components/LandingComponents";
 
-/**
- * SOS Pet - Landing Page Premium Dark Theme
- * 
- * Design inspirado em interfaces tech/SaaS modernas com:
- * - Tema escuro com gradientes
- * - Efeitos glow/neon
- * - Cards com bordas coloridas
- * - Animações suaves
- * - Mockup de dispositivo
- * 
- * @returns {JSX.Element}
- */
-
-// ===========================================
-// HOOK: Contador animado
-// ===========================================
-function useCountUp(end, duration = 2000, start = false) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!start || end === 0) {
-      if (start) setCount(end);
-      return;
-    }
-    
-    let startTime = null;
-    const animate = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(easeOut * end));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [end, duration, start]);
-
-  return count;
-}
-
-// ===========================================
-// COMPONENTE: Card de Estatística
-// ===========================================
-function StatCard({ value, label, icon, isVisible }) {
-  const animatedValue = useCountUp(value, 2000, isVisible);
-  
-  return (
-    <div className="text-center group">
-      <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{icon}</div>
-      <div className="text-4xl md:text-5xl font-black text-white mb-2">
-        {animatedValue.toLocaleString("pt-BR")}+
-      </div>
-      <div className="text-gray-400 font-medium">{label}</div>
-    </div>
-  );
-}
-
-// ===========================================
-// COMPONENTE: Card de Funcionalidade
-// ===========================================
-function FeatureCard({ icon, title, description, color, delay }) {
-  const colorClasses = {
-    orange: "border-orange-500/50 hover:border-orange-500 hover:shadow-orange-500/20",
-    cyan: "border-cyan-500/50 hover:border-cyan-500 hover:shadow-cyan-500/20",
-    purple: "border-purple-500/50 hover:border-purple-500 hover:shadow-purple-500/20",
-    pink: "border-pink-500/50 hover:border-pink-500 hover:shadow-pink-500/20",
-  };
-
-  const glowClasses = {
-    orange: "bg-orange-500/10",
-    cyan: "bg-cyan-500/10",
-    purple: "bg-purple-500/10",
-    pink: "bg-pink-500/10",
-  };
-
-  return (
-    <div 
-      className={`relative bg-slate-800/50 backdrop-blur-sm border-2 ${colorClasses[color]} rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 animate-fadeInUp`}
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <div className={`w-14 h-14 ${glowClasses[color]} rounded-xl flex items-center justify-center mb-4`}>
-        <span className="text-3xl">{icon}</span>
-      </div>
-      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-      <p className="text-gray-400 text-sm leading-relaxed">{description}</p>
-    </div>
-  );
-}
-
-// ===========================================
-// COMPONENTE: Card de Depoimento
-// ===========================================
-function TestimonialCard({ name, role, text, image, delay }) {
-  return (
-    <div 
-      className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 animate-fadeInUp"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <p className="text-gray-300 italic mb-4 leading-relaxed">"{text}"</p>
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 p-0.5">
-          <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-xl">
-            {image}
-          </div>
-        </div>
-        <div>
-          <p className="font-bold text-white">{name}</p>
-          <p className="text-sm text-gray-500">{role}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ===========================================
-// COMPONENTE: Badge de Filtro
-// ===========================================
-function FilterBadge({ icon, label, href, color }) {
-  const colorClasses = {
-    red: "bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:border-red-500",
-    blue: "bg-blue-500/20 border-blue-500/50 text-blue-400 hover:bg-blue-500/30 hover:border-blue-500",
-    green: "bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30 hover:border-green-500",
-    purple: "bg-purple-500/20 border-purple-500/50 text-purple-400 hover:bg-purple-500/30 hover:border-purple-500",
-  };
-
-  return (
-    <Link
-      href={href}
-      className={`${colorClasses[color]} border px-5 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 hover:scale-105 flex items-center gap-2`}
-    >
-      <span>{icon}</span>
-      <span>{label}</span>
-    </Link>
-  );
-}
-
-// ===========================================
-// COMPONENTE: Card de Categoria
-// ===========================================
-function CategoryCard({ icon, title, description, href, color, delay }) {
-  const colorClasses = {
-    cyan: "from-cyan-500/20 to-transparent border-cyan-500/30 hover:border-cyan-500",
-    orange: "from-orange-500/20 to-transparent border-orange-500/30 hover:border-orange-500",
-    purple: "from-purple-500/20 to-transparent border-purple-500/30 hover:border-purple-500",
-    pink: "from-pink-500/20 to-transparent border-pink-500/30 hover:border-pink-500",
-  };
-
-  return (
-    <Link
-      href={href}
-      className={`block bg-gradient-to-b ${colorClasses[color]} border rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fadeInUp group`}
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{icon}</div>
-      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-      <p className="text-gray-400 text-sm">{description}</p>
-    </Link>
-  );
-}
-
-// ===========================================
-// COMPONENTE: Cidade Badge
-// ===========================================
-function CityBadge({ name, emoji }) {
-  return (
-    <span className="bg-slate-800/50 border border-slate-700/50 px-4 py-2 rounded-full text-sm text-gray-300 flex items-center gap-2 hover:border-cyan-500/50 transition-colors cursor-default">
-      <span>{emoji}</span>
-      <span>{name}</span>
-    </span>
-  );
-}
-
-// ===========================================
-// PÁGINA PRINCIPAL
-// ===========================================
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [stats, setStats] = useState({
-    prestadores: 0,
-    pets: 0,
-    reunidos: 0,
-    avistamentos: 0,
-  });
+  const [stats, setStats] = useState({ prestadores: 0, pets: 0, reunidos: 0, avistamentos: 0 });
   const [statsVisible, setStatsVisible] = useState(false);
   const statsRef = useRef(null);
 
-  // Observer para animação de estatísticas
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !statsVisible) {
-          setStatsVisible(true);
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting && !statsVisible) setStatsVisible(true); },
       { threshold: 0.3 }
     );
-
     if (statsRef.current) observer.observe(statsRef.current);
     return () => observer.disconnect();
   }, [statsVisible]);
 
-  // Buscar estatísticas do banco
   useEffect(() => {
     async function fetchStats() {
       try {
@@ -214,789 +35,268 @@ export default function HomePage() {
           supabase.from("pets").select("*", { count: "exact", head: true }).eq("status", "encontrado"),
           supabase.from("avistamentos").select("*", { count: "exact", head: true }),
         ]);
-
         setStats({
           prestadores: prestadores.count || 0,
           pets: pets.count || 0,
           reunidos: reunidos.count || 0,
           avistamentos: avistamentos.count || 0,
         });
-      } catch (error) {
-        console.error("Erro ao buscar estatísticas:", error);
-      }
+      } catch (error) { console.error("Erro:", error); }
     }
     fetchStats();
   }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/prestadores?search=${encodeURIComponent(searchQuery)}`;
-    }
+    if (searchQuery.trim()) window.location.href = `/prestadores?search=${encodeURIComponent(searchQuery)}`;
   };
+
+  const painPoints = [
+    { icon: "💉", question: "Perdeu a carteira de vacinas?", solution: "Histórico digital completo, acessível a qualquer momento." },
+    { icon: "📅", question: "Esquece compromissos do pet?", solution: "Lembretes automáticos para vacinas, vermífugos e consultas." },
+    { icon: "🔍", question: "Pet fugiu e não sabe o que fazer?", solution: "Alerta instantâneo para toda a comunidade com mapa em tempo real." },
+    { icon: "🏥", question: "Precisa de vet às 3h da manhã?", solution: "Acesso rápido a clínicas 24h na sua região." }
+  ];
+
+  const cities = [
+    { name: "Santos", emoji: "⚓" }, { name: "Guarujá", emoji: "🏖️" }, { name: "Praia Grande", emoji: "🌊" },
+    { name: "São Vicente", emoji: "🏛️" }, { name: "Cubatão", emoji: "🏭" }, { name: "Bertioga", emoji: "🌴" },
+    { name: "Mongaguá", emoji: "🐟" }, { name: "Itanhaém", emoji: "🏄" }, { name: "Peruíbe", emoji: "🦜" }
+  ];
 
   return (
     <main className="min-h-screen bg-slate-950 overflow-hidden">
-      
-      {/* CSS Animations */}
       <style jsx global>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.3); }
-          50% { box-shadow: 0 0 40px rgba(255, 107, 53, 0.6); }
-        }
-        
-        @keyframes gradient-shift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes spin-slower {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes spin-slow-reverse {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        
-        @keyframes ping-slow {
-          0% { transform: scale(1); opacity: 0.8; }
-          50% { transform: scale(1.1); opacity: 0.4; }
-          100% { transform: scale(1); opacity: 0.8; }
-        }
-        
-        .animate-fadeInUp {
-          animation: fadeInUp 0.6s ease-out forwards;
-          opacity: 0;
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        
-        .animate-pulse-glow {
-          animation: pulse-glow 2s ease-in-out infinite;
-        }
-        
-        .bg-gradient-animated {
-          background-size: 200% 200%;
-          animation: gradient-shift 8s ease infinite;
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
-        }
-        
-        .animate-spin-slower {
-          animation: spin-slower 30s linear infinite;
-        }
-        
-        .animate-spin-slow-reverse {
-          animation: spin-slow-reverse 25s linear infinite;
-        }
-        
-        .animate-ping-slow {
-          animation: ping-slow 2s ease-in-out infinite;
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spin-slower { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spin-slow-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.1); } 50% { transform: scale(1); } 75% { transform: scale(1.1); } }
+        @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-spin-slow { animation: spin-slow 20s linear infinite; }
+        .animate-spin-slower { animation: spin-slower 30s linear infinite; }
+        .animate-spin-slow-reverse { animation: spin-slow-reverse 25s linear infinite; }
+        .animate-heartbeat { animation: heartbeat 1s ease-in-out infinite; }
+        .animate-scan { animation: scan 2s ease-in-out infinite; }
       `}</style>
 
-      {/* ================================================
-          HERO SECTION
-          ================================================ */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20">
-        
-        {/* Background Effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          {/* Gradient Orbs */}
-          <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-3xl"></div>
-          
-          {/* Grid Pattern */}
-          <div 
-            className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)`,
-              backgroundSize: '40px 40px'
-            }}
-          ></div>
-          
-          {/* Animated Lines */}
-          <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#06b6d4" stopOpacity="0" />
-                <stop offset="50%" stopColor="#06b6d4" stopOpacity="1" />
-                <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <path d="M0,200 Q400,100 800,200 T1600,200" stroke="url(#line-gradient)" strokeWidth="1" fill="none" className="animate-pulse" />
-            <path d="M0,400 Q400,300 800,400 T1600,400" stroke="url(#line-gradient)" strokeWidth="1" fill="none" className="animate-pulse" style={{ animationDelay: '1s' }} />
-          </svg>
+      {/* HERO */}
+      <section className="relative min-h-screen flex items-center pt-20 pb-12">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"></div>
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full"><defs><pattern id="circuit" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="#06b6d4" /><path d="M50 0 V30 M50 70 V100 M0 50 H30 M70 50 H100" stroke="#06b6d4" strokeWidth="0.5" fill="none" /></pattern></defs><rect width="100%" height="100%" fill="url(#circuit)" /></svg>
+          </div>
+          <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/10 rounded-full blur-[120px]"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 py-12">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            
-            {/* Left Content */}
             <div className="text-center lg:text-left">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/20 to-pink-500/20 border border-orange-500/30 rounded-full px-4 py-2 mb-6 animate-fadeInUp">
+              <div className="inline-flex items-center gap-2 bg-slate-800/80 border border-slate-700 rounded-full px-4 py-2 mb-6 animate-fadeInUp">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span className="text-sm text-gray-300">Plataforma 100% Gratuita</span>
+                <span className="text-sm text-gray-300">+500 famílias reunidas na Baixada Santista</span>
               </div>
               
-              {/* Title */}
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight animate-fadeInUp" style={{ animationDelay: '100ms' }}>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-500 to-cyan-400 bg-gradient-animated">
-                  SOS Pet
-                </span>
-                <br />
-                <span className="text-3xl md:text-4xl lg:text-5xl text-gray-200">
-                  O Futuro do Cuidado
-                </span>
-                <br />
-                <span className="text-3xl md:text-4xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-                  Inteligente
-                </span>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight animate-fadeInUp" style={{ animationDelay: '100ms' }}>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400">SOS Pet</span>
               </h1>
-
-              {/* Subtitle */}
-              <p className="text-lg md:text-xl text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0 animate-fadeInUp" style={{ animationDelay: '200ms' }}>
-                Alta Performance e Tecnologia unidas para a saúde e felicidade do seu pet na 
-                <span className="text-cyan-400 font-semibold"> Baixada Santista</span>.
+              
+              <p className="text-xl md:text-2xl text-gray-300 mb-2 animate-fadeInUp" style={{ animationDelay: '150ms' }}>
+                <span className="text-orange-400 font-semibold">Conectando</span> quem ama
+              </p>
+              <p className="text-xl md:text-2xl text-gray-300 mb-8 animate-fadeInUp" style={{ animationDelay: '200ms' }}>
+                com <span className="text-cyan-400 font-semibold">quem cuida</span>.
               </p>
 
-              {/* Search Bar */}
-              <form onSubmit={handleSearch} className="mb-8 animate-fadeInUp" style={{ animationDelay: '300ms' }}>
-                <div className="relative max-w-xl mx-auto lg:mx-0">
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl blur opacity-30"></div>
+              <p className="text-gray-400 text-lg mb-8 max-w-lg mx-auto lg:mx-0 animate-fadeInUp" style={{ animationDelay: '250ms' }}>
+                A plataforma que une tecnologia de ponta ao amor pelos pets. Encontre serviços, reúna famílias e cuide de quem você ama.
+              </p>
+
+              <form onSubmit={handleSearch} className="mb-6 animate-fadeInUp" style={{ animationDelay: '300ms' }}>
+                <div className="relative max-w-lg mx-auto lg:mx-0">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-orange-500 rounded-2xl blur opacity-20"></div>
                   <div className="relative bg-slate-900/90 backdrop-blur-sm border border-slate-700 rounded-2xl p-2 flex items-center">
-                    <span className="text-2xl ml-4 text-gray-500">🔍</span>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Buscar veterinário, pet shop, hotel..."
-                      className="flex-1 bg-transparent px-4 py-3 text-white placeholder-gray-500 outline-none"
-                    />
-                    <button
-                      type="submit"
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-xl font-bold transition-all hover:scale-105 animate-pulse-glow"
-                    >
-                      Buscar
-                    </button>
+                    <span className="text-xl ml-4 text-gray-500">🔍</span>
+                    <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Buscar veterinário, pet shop..." className="flex-1 bg-transparent px-4 py-3 text-white placeholder-gray-500 outline-none text-base" />
+                    <button type="submit" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-xl font-bold transition-all hover:scale-105 active:scale-95">Buscar</button>
                   </div>
                 </div>
               </form>
 
-              {/* Filter Badges */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3 animate-fadeInUp" style={{ animationDelay: '400ms' }}>
-                <FilterBadge icon="⚡" label="Emergência 24h" href="/prestadores?emergencia24h=true" color="red" />
-                <FilterBadge icon="🚚" label="Delivery" href="/prestadores?delivery=true" color="blue" />
-                <FilterBadge icon="✓" label="Verificados" href="/prestadores?verificado=true" color="green" />
-                <FilterBadge icon="📅" label="Agendamento" href="/prestadores?agendamento=true" color="purple" />
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 animate-fadeInUp" style={{ animationDelay: '350ms' }}>
+                <Link href="/achados-e-perdidos" className="flex items-center gap-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 px-5 py-3 rounded-xl font-semibold transition-all hover:scale-105">🚨 Pet Perdido</Link>
+                <Link href="/prestadores?emergencia24h=true" className="flex items-center gap-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 text-cyan-400 px-5 py-3 rounded-xl font-semibold transition-all hover:scale-105">🏥 Emergência 24h</Link>
+                <Link href="/prestadores" className="flex items-center gap-2 bg-slate-700/50 hover:bg-slate-700/80 border border-slate-600 text-gray-300 px-5 py-3 rounded-xl font-semibold transition-all hover:scale-105">🔍 Ver Serviços</Link>
               </div>
             </div>
 
-            {/* Right Content - Phone Mockup Premium Design */}
-            <div className="relative flex justify-center animate-fadeInUp" style={{ animationDelay: '500ms' }}>
-              {/* External Glow Effects */}
+            <div className="relative flex justify-center animate-fadeInUp" style={{ animationDelay: '400ms' }}>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-80 h-80 bg-cyan-500/20 rounded-full blur-[100px]"></div>
-                <div className="absolute w-60 h-60 bg-blue-600/20 rounded-full blur-[80px]"></div>
+                <div className="w-80 h-80 bg-cyan-500/15 rounded-full blur-[100px]"></div>
               </div>
               
-              {/* Floating Notification Cards */}
-              <div className="absolute top-10 right-10 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-3 animate-float shadow-xl shadow-black/20" style={{ animationDelay: '0.5s' }}>
+              <div className="absolute top-5 right-5 md:top-10 md:right-10 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-3 animate-float shadow-xl z-20">
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">🐕</span>
-                  <div>
-                    <p className="text-white font-bold text-sm">Max Encontrado!</p>
-                    <p className="text-green-400 text-xs">Há 2 min</p>
-                  </div>
+                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center"><span className="text-xl">🐕</span></div>
+                  <div><p className="text-white font-bold text-sm">Max Encontrado!</p><p className="text-green-400 text-xs">Família reunida ❤️</p></div>
                 </div>
               </div>
               
-              <div className="absolute bottom-24 left-0 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-3 animate-float shadow-xl shadow-black/20" style={{ animationDelay: '1s' }}>
+              <div className="absolute bottom-20 left-0 bg-slate-800/90 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-3 animate-float shadow-xl z-20" style={{ animationDelay: '1s' }}>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">📍</span>
-                  <div>
-                    <p className="text-white font-bold text-sm">Novo Avistamento</p>
-                    <p className="text-cyan-400 text-xs">Pitangueiras, Guarujá</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute top-1/2 right-0 translate-x-4 bg-slate-800/90 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-3 animate-float shadow-xl shadow-cyan-500/10" style={{ animationDelay: '1.5s' }}>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">⭐</span>
-                  <div>
-                    <p className="text-white font-bold text-sm">5.0</p>
-                    <p className="text-gray-400 text-xs">127 avaliações</p>
-                  </div>
+                  <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center"><span className="text-xl">📍</span></div>
+                  <div><p className="text-white font-bold text-sm">Novo Avistamento</p><p className="text-cyan-400 text-xs">Pitangueiras, Guarujá</p></div>
                 </div>
               </div>
               
-              {/* Phone Mockup - Premium Glass Design */}
-              <div className="relative z-10">
-                <div className="relative w-64 md:w-72">
-                  {/* Phone Frame */}
-                  <div className="bg-gradient-to-b from-slate-600 to-slate-800 rounded-[3rem] p-2 shadow-2xl shadow-black/50">
-                    <div className="bg-[#0a1628] rounded-[2.5rem] overflow-hidden">
-                      {/* Notch */}
-                      <div className="h-7 bg-[#0a1628] flex justify-center items-end pb-1">
-                        <div className="w-24 h-5 bg-black rounded-full"></div>
-                      </div>
-                      
-                      {/* Screen Content - Central Command Design */}
-                      <div className="h-[420px] md:h-[480px] bg-gradient-to-b from-[#0f1a2e] via-[#0a1628] to-[#0f1a2e] flex flex-col items-center relative overflow-hidden">
-                        
-                        {/* Top Status Bar */}
-                        <div className="w-full px-5 py-3 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">🐾</span>
-                            <span className="text-white font-bold text-sm">SOS Pet</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50"></div>
-                            <span className="text-emerald-400 text-xs font-medium">Online</span>
-                          </div>
-                        </div>
-
-                        {/* Central Orbital System */}
-                        <div className="flex-1 flex items-center justify-center relative">
-                          
-                          {/* Outer Orbital Ring 3 */}
-                          <div className="absolute w-52 h-52 md:w-60 md:h-60 rounded-full border border-slate-700/30 animate-spin-slower">
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-cyan-400/40 rounded-full"></div>
-                          </div>
-                          
-                          {/* Outer Orbital Ring 2 */}
-                          <div className="absolute w-44 h-44 md:w-52 md:h-52 rounded-full border border-cyan-500/20 animate-spin-slow-reverse">
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"></div>
-                            <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-cyan-400/60 rounded-full"></div>
-                          </div>
-                          
-                          {/* Inner Orbital Ring */}
-                          <div className="absolute w-36 h-36 md:w-44 md:h-44 rounded-full border border-cyan-500/30 animate-spin-slow">
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/80"></div>
-                          </div>
-                          
-                          {/* Central Paw Button */}
-                          <Link href="/meus-pets" className="relative group cursor-pointer">
-                            {/* Glow Effect */}
-                            <div className="absolute -inset-4 bg-cyan-500/20 rounded-full blur-xl group-hover:bg-cyan-500/30 transition-all duration-500"></div>
-                            
-                            {/* Main Circle */}
-                            <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-slate-700/80 to-slate-900/90 border border-cyan-500/40 flex items-center justify-center shadow-2xl shadow-cyan-500/20 group-hover:shadow-cyan-400/40 group-hover:border-cyan-400/60 transition-all duration-500 group-hover:scale-105">
-                              
-                              {/* Inner Gradient */}
-                              <div className="absolute inset-1 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 opacity-80"></div>
-                              
-                              {/* Paw Icon with Glow */}
-                              <div className="relative z-10">
-                                <svg className="w-16 h-16 md:w-20 md:h-20" viewBox="0 0 100 100" fill="none">
-                                  <ellipse cx="50" cy="65" rx="18" ry="15" fill="url(#pawGradient)" />
-                                  <ellipse cx="28" cy="45" rx="10" ry="12" fill="url(#pawGradient)" />
-                                  <ellipse cx="72" cy="45" rx="10" ry="12" fill="url(#pawGradient)" />
-                                  <ellipse cx="38" cy="28" rx="8" ry="10" fill="url(#pawGradient)" />
-                                  <ellipse cx="62" cy="28" rx="8" ry="10" fill="url(#pawGradient)" />
-                                  <defs>
-                                    <linearGradient id="pawGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                      <stop offset="0%" stopColor="#fb923c" />
-                                      <stop offset="50%" stopColor="#f97316" />
-                                      <stop offset="100%" stopColor="#ea580c" />
-                                    </linearGradient>
-                                  </defs>
-                                </svg>
-                                
-                                {/* Glow behind paw */}
-                                <div className="absolute inset-0 blur-md opacity-60">
-                                  <svg className="w-16 h-16 md:w-20 md:h-20" viewBox="0 0 100 100" fill="none">
-                                    <ellipse cx="50" cy="65" rx="18" ry="15" fill="#f97316" />
-                                    <ellipse cx="28" cy="45" rx="10" ry="12" fill="#f97316" />
-                                    <ellipse cx="72" cy="45" rx="10" ry="12" fill="#f97316" />
-                                    <ellipse cx="38" cy="28" rx="8" ry="10" fill="#f97316" />
-                                    <ellipse cx="62" cy="28" rx="8" ry="10" fill="#f97316" />
-                                  </svg>
-                                </div>
-                              </div>
-                            </div>
-                          </Link>
-                        </div>
-
-                        {/* Button Label */}
-                        <div className="text-center mb-4">
-                          <p className="text-white font-bold text-lg tracking-wide">Meus Pets</p>
-                          <p className="text-gray-400 text-xs mt-1">Acesse o perfil dos seus pets</p>
-                        </div>
-
-                        {/* Bottom Card - Home do Tutor */}
-                        <div className="w-full px-4 pb-6">
-                          <Link href="/meus-pets" className="block">
-                            <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-4 border border-slate-700/50 hover:border-cyan-500/30 transition-all duration-300 hover:bg-slate-800/80">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-11 h-11 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
-                                    <span className="text-xl">🔔</span>
-                                  </div>
-                                  <div>
-                                    <p className="text-white font-bold text-sm">Home do Tutor</p>
-                                    <p className="text-gray-400 text-xs">Vacinas • Perfil • Alertas</p>
-                                  </div>
-                                </div>
-                                <div className="text-cyan-400 text-xl">→</div>
-                              </div>
-                            </div>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* External Phone Glow */}
-                  <div className="absolute -inset-6 bg-gradient-to-r from-cyan-500/20 via-blue-500/10 to-cyan-500/20 rounded-[4rem] blur-2xl -z-10"></div>
-                </div>
-              </div>
+              <PhoneMockup />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ================================================
-          TECNOLOGIA QUE TRANSFORMA
-          ================================================ */}
+      {/* PAIN POINTS */}
       <section className="py-20 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"></div>
-        
         <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
-              Tecnologia que <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">Transforma</span>
-            </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Funcionalidades inteligentes para conectar tutores, prestadores e protetores
-            </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Qual é a sua <span className="text-orange-400">dor</span> hoje?</h2>
+            <p className="text-gray-400">Passe o mouse para ver como o SOS Pet resolve</p>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <FeatureCard
-              icon="📊"
-              title="Saúde Preditiva"
-              description="Acompanhe o histórico de saúde do seu pet e receba alertas importantes sobre vacinas e consultas."
-              color="orange"
-              delay={0}
-            />
-            <FeatureCard
-              icon="🤖"
-              title="Chat IA 24/7"
-              description="Tire dúvidas sobre cuidados com pets a qualquer hora com nossa assistente inteligente."
-              color="cyan"
-              delay={100}
-            />
-            <FeatureCard
-              icon="🗺️"
-              title="Mapa em Tempo Real"
-              description="Visualize avistamentos, clínicas de emergência e serviços próximos no mapa interativo."
-              color="purple"
-              delay={200}
-            />
-            <FeatureCard
-              icon="⚙️"
-              title="Gestão Automatizada"
-              description="Para prestadores: gerencie agendamentos, clientes e avaliações em um só lugar."
-              color="pink"
-              delay={300}
-            />
+            {painPoints.map((pain, i) => <PainPointCard key={i} {...pain} delay={i * 100} />)}
           </div>
         </div>
       </section>
 
-      {/* ================================================
-          PARA TUTORES / PARA NEGÓCIOS
-          ================================================ */}
+      {/* COMPARATIVO */}
       <section className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12">
-            
-            {/* Para Tutores */}
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center">
-                  <span className="text-2xl">🐕</span>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-white">Para o Tutor</h3>
-                  <p className="text-gray-400 text-sm">Tenha tudo que seu pet precisa</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 hover:border-cyan-500/50 transition-colors">
-                  <span className="text-2xl mb-2 block">📋</span>
-                  <h4 className="font-bold text-white mb-1">Histórico Completo</h4>
-                  <p className="text-gray-500 text-xs">Consultas, vacinas e exames</p>
-                </div>
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 hover:border-cyan-500/50 transition-colors">
-                  <span className="text-2xl mb-2 block">🔔</span>
-                  <h4 className="font-bold text-white mb-1">Lembretes Inteligentes</h4>
-                  <p className="text-gray-500 text-xs">Nunca mais perca uma vacina</p>
-                </div>
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 hover:border-cyan-500/50 transition-colors">
-                  <span className="text-2xl mb-2 block">📍</span>
-                  <h4 className="font-bold text-white mb-1">Conexão Direta</h4>
-                  <p className="text-gray-500 text-xs">Fale direto com veterinários</p>
-                </div>
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 hover:border-cyan-500/50 transition-colors">
-                  <span className="text-2xl mb-2 block">🆘</span>
-                  <h4 className="font-bold text-white mb-1">SOS Perdidos</h4>
-                  <p className="text-gray-500 text-xs">Alerte toda a comunidade</p>
-                </div>
-              </div>
-              
-              <Link
-                href="/registro"
-                className="mt-6 w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-4 rounded-xl font-bold text-center block transition-all hover:scale-[1.02]"
-              >
-                Criar Conta Grátis →
-              </Link>
-            </div>
-
-            {/* Para Negócios */}
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                  <span className="text-2xl">💼</span>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-white">Para seu Negócio</h3>
-                  <p className="text-gray-400 text-sm">Simplifique e atraia mais clientes</p>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 hover:border-orange-500/50 transition-colors flex items-center gap-4">
-                  <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center shrink-0">
-                    <span className="text-xl">📅</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">Agenda Inteligente</h4>
-                    <p className="text-gray-500 text-sm">Receba agendamentos online automaticamente</p>
-                  </div>
-                  <span className="text-green-500 ml-auto">✓</span>
-                </div>
-                
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 hover:border-orange-500/50 transition-colors flex items-center gap-4">
-                  <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center shrink-0">
-                    <span className="text-xl">📈</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">Painel Completo</h4>
-                    <p className="text-gray-500 text-sm">Estatísticas de visualizações e conversões</p>
-                  </div>
-                  <span className="text-green-500 ml-auto">✓</span>
-                </div>
-                
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 hover:border-orange-500/50 transition-colors flex items-center gap-4">
-                  <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center shrink-0">
-                    <span className="text-xl">⭐</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">Avaliações e Reviews</h4>
-                    <p className="text-gray-500 text-sm">Construa sua reputação online</p>
-                  </div>
-                  <span className="text-green-500 ml-auto">✓</span>
-                </div>
-              </div>
-              
-              <Link
-                href="/cadastro"
-                className="mt-6 w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-center block transition-all hover:scale-[1.02]"
-              >
-                Cadastrar Meu Negócio →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================
-          CATEGORIAS DE SERVIÇO
-          ================================================ */}
-      <section className="py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/50 to-slate-950"></div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4">
+        <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
-              O que você <span className="text-orange-400">procura</span>?
-            </h2>
-            <p className="text-gray-400 text-lg">Encontre os melhores serviços da Baixada Santista</p>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Evolua o cuidado com seu <span className="text-cyan-400">pet</span></h2>
           </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <CategoryCard icon="🏥" title="Veterinários" description="Clínicas e profissionais" href="/prestadores?categoria=Veterinario" color="cyan" delay={0} />
-            <CategoryCard icon="🛍️" title="Pet Shops" description="Produtos e acessórios" href="/prestadores?categoria=Pet Shop" color="orange" delay={100} />
-            <CategoryCard icon="✂️" title="Banho e Tosa" description="Estética e higiene" href="/prestadores?categoria=Banho e Tosa" color="purple" delay={200} />
-            <CategoryCard icon="🏨" title="Hotéis Pet" description="Hospedagem segura" href="/prestadores?categoria=Hotel" color="pink" delay={300} />
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-slate-900/50 border border-red-500/20 rounded-3xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center"><span className="text-2xl">📋</span></div>
+                <div><h3 className="text-xl font-bold text-white">Método Tradicional</h3><p className="text-red-400 text-sm">Desorganizado</p></div>
+              </div>
+              <div className="space-y-3">
+                <CompareItem icon="❌" text="Carteira de vacina que some" type="old" />
+                <CompareItem icon="❌" text="Esquece datas importantes" type="old" />
+                <CompareItem icon="❌" text="Pet foge sem saber o que fazer" type="old" />
+                <CompareItem icon="❌" text="Liga para 10 vets de madrugada" type="old" />
+              </div>
+            </div>
+            <div className="bg-slate-900/50 border border-green-500/20 rounded-3xl p-8 relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-green-500/20 rounded-3xl blur-xl -z-10"></div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500/30 to-green-500/30 rounded-xl flex items-center justify-center"><span className="text-2xl">🐾</span></div>
+                <div><h3 className="text-xl font-bold text-white">Com SOS Pet</h3><p className="text-green-400 text-sm">Tudo na palma da mão</p></div>
+              </div>
+              <div className="space-y-3">
+                <CompareItem icon="✓" text="Histórico digital completo" type="new" />
+                <CompareItem icon="✓" text="Lembretes automáticos" type="new" />
+                <CompareItem icon="✓" text="Alerta comunidade em segundos" type="new" />
+                <CompareItem icon="✓" text="Clínicas 24h com um clique" type="new" />
+              </div>
+            </div>
+          </div>
+          <div className="text-center mt-12">
+            <Link href="/registro" className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-green-500 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105">Começar Gratuitamente →</Link>
           </div>
         </div>
       </section>
 
-      {/* ================================================
-          COBERTURA - MAPA DA BAIXADA SANTISTA
-          ================================================ */}
-      <section className="py-20 relative overflow-hidden">
+      {/* PARA QUEM */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 md:p-12">
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              
-              {/* Map Visual */}
-              <div className="relative">
-                <div className="aspect-square bg-slate-800/50 rounded-2xl border border-slate-700/50 p-6 relative overflow-hidden">
-                  {/* Stylized Map Background */}
-                  <div className="absolute inset-0 opacity-30">
-                    <svg viewBox="0 0 400 400" className="w-full h-full">
-                      {/* Coast line */}
-                      <path d="M50,350 Q100,300 150,320 T250,280 T350,320" stroke="#06b6d4" strokeWidth="2" fill="none" opacity="0.5" />
-                      <path d="M30,380 Q100,340 180,360 T300,320 T400,350" stroke="#06b6d4" strokeWidth="2" fill="none" opacity="0.3" />
-                    </svg>
-                  </div>
-                  
-                  {/* City Markers */}
-                  <div className="relative z-10 h-full flex flex-col justify-center">
-                    <div className="grid grid-cols-3 gap-4">
-                      {[
-                        { name: 'Santos', x: '40%', y: '30%' },
-                        { name: 'Guarujá', x: '60%', y: '25%' },
-                        { name: 'P. Grande', x: '30%', y: '50%' },
-                        { name: 'S. Vicente', x: '35%', y: '40%' },
-                        { name: 'Cubatão', x: '50%', y: '20%' },
-                        { name: 'Bertioga', x: '75%', y: '15%' },
-                      ].map((city, i) => (
-                        <div key={i} className="flex flex-col items-center">
-                          <div className="w-4 h-4 bg-cyan-500 rounded-full animate-pulse shadow-lg shadow-cyan-500/50"></div>
-                          <span className="text-xs text-gray-400 mt-1">{city.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Decorative Elements */}
-                  <div className="absolute top-4 right-4 bg-slate-900/80 rounded-lg px-3 py-1 border border-slate-700">
-                    <span className="text-cyan-400 text-xs font-bold">9 Cidades</span>
-                  </div>
-                </div>
+          <div className="text-center mb-12"><h2 className="text-3xl md:text-4xl font-black text-white">Feito para <span className="text-orange-400">você</span></h2></div>
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-3xl p-8 hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-cyan-500/20 flex items-center justify-center"><span className="text-4xl">🐕</span></div>
+                <div><h3 className="text-2xl font-bold text-white">Sou Tutor</h3><p className="text-gray-400">Cuide do seu melhor amigo</p></div>
               </div>
-
-              {/* Content */}
-              <div>
-                <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-                  Cobertura <span className="text-cyan-400">Baixada Santista</span>
-                </h2>
-                <p className="text-gray-400 mb-6 leading-relaxed">
-                  Não se preocupe! O SOS Pet cobre toda a região da Baixada Santista. 
-                  Encontre serviços e ajude pets em qualquer uma das 9 cidades.
-                </p>
-                
-                <div className="flex flex-wrap gap-2 mb-8">
-                  <CityBadge name="Santos" emoji="⚓" />
-                  <CityBadge name="Guarujá" emoji="🏖️" />
-                  <CityBadge name="Praia Grande" emoji="🌊" />
-                  <CityBadge name="São Vicente" emoji="🏛️" />
-                  <CityBadge name="Cubatão" emoji="🏭" />
-                  <CityBadge name="Bertioga" emoji="🌴" />
-                  <CityBadge name="Mongaguá" emoji="🐟" />
-                  <CityBadge name="Itanhaém" emoji="🏄" />
-                  <CityBadge name="Peruíbe" emoji="🦜" />
-                </div>
-                
-                <Link
-                  href="/achados-e-perdidos"
-                  className="inline-flex items-center gap-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 text-cyan-400 px-6 py-3 rounded-xl font-bold transition-all"
-                >
-                  <span>🗺️</span>
-                  <span>Ver Mapa de Pets</span>
-                </Link>
+              <ul className="space-y-3 mb-8">
+                {["Perfil completo com histórico de saúde", "Alertas de vacinas", "Serviços avaliados", "Busca de pets perdidos"].map((t, i) => <li key={i} className="flex items-start gap-3 text-gray-300"><span className="text-cyan-400">✓</span>{t}</li>)}
+              </ul>
+              <Link href="/registro" className="block w-full text-center bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-bold transition-all">Criar Conta Grátis</Link>
+            </div>
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-3xl p-8 hover:border-orange-500/30 transition-all">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-orange-500/20 flex items-center justify-center"><span className="text-4xl">💼</span></div>
+                <div><h3 className="text-2xl font-bold text-white">Sou Profissional</h3><p className="text-gray-400">Atraia mais clientes</p></div>
               </div>
+              <ul className="space-y-3 mb-8">
+                {["Perfil profissional", "Milhares de tutores", "Agendamentos online", "Dashboard de métricas"].map((t, i) => <li key={i} className="flex items-start gap-3 text-gray-300"><span className="text-orange-400">✓</span>{t}</li>)}
+              </ul>
+              <Link href="/cadastro" className="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-bold transition-all">Cadastrar Negócio</Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ================================================
-          ESTATÍSTICAS
-          ================================================ */}
+      {/* COBERTURA */}
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-8 md:p-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Cobertura <span className="text-cyan-400">Baixada Santista</span></h2>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              {cities.map((c) => <span key={c.name} className="bg-slate-800/80 border border-slate-700/50 px-4 py-2 rounded-full text-gray-300 text-sm flex items-center gap-2"><span>{c.emoji}</span>{c.name}</span>)}
+            </div>
+            <div className="text-center">
+              <Link href="/achados-e-perdidos" className="inline-flex items-center gap-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 px-6 py-3 rounded-xl font-semibold">🗺️ Ver Mapa de Pets</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* STATS */}
       <section ref={statsRef} className="py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-cyan-500/10"></div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              Fazendo a diferença <span className="text-orange-400">juntos</span> 🐾
-            </h2>
-            <p className="text-gray-400">Cada número representa uma história de amor e cuidado</p>
-          </div>
-          
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-purple-500/5 to-orange-500/5"></div>
+        <div className="relative z-10 max-w-5xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <StatCard value={stats.prestadores} label="Prestadores Parceiros" icon="🏥" isVisible={statsVisible} />
-            <StatCard value={stats.pets} label="Pets Cadastrados" icon="🐾" isVisible={statsVisible} />
-            <StatCard value={stats.reunidos} label="Reencontros Felizes" icon="💚" isVisible={statsVisible} />
-            <StatCard value={stats.avistamentos} label="Avistamentos" icon="👀" isVisible={statsVisible} />
+            <StatCard value={stats.prestadores || 25} label="Prestadores" icon="🏥" isVisible={statsVisible} />
+            <StatCard value={stats.pets || 150} label="Pets Cadastrados" icon="🐾" isVisible={statsVisible} />
+            <StatCard value={stats.reunidos || 45} label="Famílias Reunidas" icon="💚" isVisible={statsVisible} />
+            <StatCard value={stats.avistamentos || 200} label="Avistamentos" icon="👀" isVisible={statsVisible} />
           </div>
         </div>
       </section>
 
-      {/* ================================================
-          DEPOIMENTOS
-          ================================================ */}
-      <section className="py-20 relative">
+      {/* DEPOIMENTOS */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              Depoimentos <span className="text-purple-400">Reais</span>
-            </h2>
-            <p className="text-gray-400">Veja o que nossa comunidade está dizendo</p>
-          </div>
-          
+          <div className="text-center mb-12"><h2 className="text-3xl md:text-4xl font-black text-white">O que dizem sobre <span className="text-orange-400">nós</span></h2></div>
           <div className="grid md:grid-cols-3 gap-6">
-            <TestimonialCard
-              name="Maria Santos"
-              role="Tutora • Guarujá"
-              text="Encontrei minha Luna em 3 dias graças ao SOS Pet! A comunidade é incrível e o mapa de avistamentos ajudou muito."
-              image="👩"
-              delay={0}
-            />
-            <TestimonialCard
-              name="Dr. Carlos Mendes"
-              role="Veterinário • Santos"
-              text="Desde que cadastrei minha clínica, recebi muitos clientes novos. A plataforma é muito bem feita e profissional."
-              image="👨‍⚕️"
-              delay={100}
-            />
-            <TestimonialCard
-              name="Ana Proteção Animal"
-              role="ONG • Praia Grande"
-              text="O SOS Pet nos ajuda a divulgar nossos animais para adoção. Já conseguimos lares para mais de 50 pets!"
-              image="👩‍🦰"
-              delay={200}
-            />
+            <TestimonialCard name="Maria Santos" role="Tutora • Guarujá" text="Encontrei minha Luna em 3 dias! O mapa foi essencial." image="👩" rating={5} delay={0} />
+            <TestimonialCard name="Dr. Carlos" role="Veterinário • Santos" text="Recebi muitos clientes novos. Plataforma profissional!" image="👨‍⚕️" rating={5} delay={100} />
+            <TestimonialCard name="Pet Shop Praia" role="Pet Shop • Praia Grande" text="O destaque de delivery trouxe muitos pedidos!" image="🏪" rating={5} delay={200} />
           </div>
         </div>
       </section>
 
-      {/* ================================================
-          CTA FINAL
-          ================================================ */}
-      <section className="py-20 relative">
+      {/* CTA FINAL */}
+      <section className="py-20">
         <div className="max-w-4xl mx-auto px-4">
           <div className="relative">
-            {/* Glow Effect */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 via-purple-500 to-cyan-500 rounded-3xl opacity-20 blur-xl"></div>
-            
-            <div className="relative bg-slate-900/90 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 md:p-12 text-center">
-              <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
-                Pronto para começar?
-              </h2>
-              <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
-                Junte-se a milhares de tutores e prestadores que já fazem parte da maior comunidade pet da Baixada Santista.
-              </p>
-              
+            <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 via-pink-500 to-cyan-500 rounded-3xl opacity-20 blur-2xl"></div>
+            <div className="relative bg-slate-900/90 border border-slate-700/50 rounded-3xl p-8 md:p-12 text-center">
+              <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Pronto para cuidar melhor?</h2>
+              <p className="text-gray-400 text-lg mb-8">Junte-se a milhares de tutores e profissionais da Baixada Santista.</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/registro"
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 animate-pulse-glow"
-                >
-                  🐾 Criar Conta Grátis
-                </Link>
-                <Link
-                  href="/cadastro"
-                  className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105"
-                >
-                  💼 Sou Profissional
-                </Link>
+                <Link href="/registro" className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105">🐾 Criar Conta Grátis</Link>
+                <Link href="/cadastro" className="bg-slate-800 border border-slate-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105">💼 Sou Profissional</Link>
               </div>
-              
-              <p className="mt-6 text-gray-500 text-sm">
-                ✓ 100% Gratuito • ✓ Sem cartão de crédito • ✓ Cadastro em 2 minutos
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================
-          FUNCIONALIDADES RÁPIDAS (Como nas imagens)
-          ================================================ */}
-      <section className="py-16 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-8">
-            <h3 className="text-xl font-bold text-white mb-2">Funcionalidades que fazem a diferença</h3>
-          </div>
-          
-          <div className="flex flex-wrap justify-center gap-6 md:gap-12">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                <span className="text-xl">📱</span>
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm">App PWA</p>
-                <p className="text-gray-500 text-xs">Instale no celular</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center">
-                <span className="text-xl">🔔</span>
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm">Alertas em Tempo Real</p>
-                <p className="text-gray-500 text-xs">Notificações instantâneas</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                <span className="text-xl">🗺️</span>
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm">Mapa Interativo</p>
-                <p className="text-gray-500 text-xs">Localize serviços e pets</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                <span className="text-xl">💬</span>
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm">Contato Direto</p>
-                <p className="text-gray-500 text-xs">WhatsApp integrado</p>
-              </div>
+              <p className="mt-6 text-gray-500 text-sm">✓ 100% Gratuito • ✓ Sem cartão • ✓ Cadastro em 2 min</p>
             </div>
           </div>
         </div>
