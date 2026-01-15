@@ -272,6 +272,16 @@ export default function HomePage() {
           to { transform: rotate(360deg); }
         }
         
+        @keyframes spin-slower {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes spin-slow-reverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        
         @keyframes ping-slow {
           0% { transform: scale(1); opacity: 0.8; }
           50% { transform: scale(1.1); opacity: 0.4; }
@@ -297,7 +307,15 @@ export default function HomePage() {
         }
         
         .animate-spin-slow {
-          animation: spin-slow 8s linear infinite;
+          animation: spin-slow 20s linear infinite;
+        }
+        
+        .animate-spin-slower {
+          animation: spin-slower 30s linear infinite;
+        }
+        
+        .animate-spin-slow-reverse {
+          animation: spin-slow-reverse 25s linear infinite;
         }
         
         .animate-ping-slow {
@@ -404,16 +422,16 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Content - Phone Mockup with Central Button */}
+            {/* Right Content - Phone Mockup Premium Design */}
             <div className="relative flex justify-center animate-fadeInUp" style={{ animationDelay: '500ms' }}>
-              {/* Glow Effect Behind Phone */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-64 h-64 bg-cyan-500/30 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute w-48 h-48 bg-orange-500/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+              {/* External Glow Effects */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-80 h-80 bg-cyan-500/20 rounded-full blur-[100px]"></div>
+                <div className="absolute w-60 h-60 bg-blue-600/20 rounded-full blur-[80px]"></div>
               </div>
               
-              {/* Floating Elements */}
-              <div className="absolute top-10 right-10 bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-xl p-3 animate-float" style={{ animationDelay: '0.5s' }}>
+              {/* Floating Notification Cards */}
+              <div className="absolute top-10 right-10 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-3 animate-float shadow-xl shadow-black/20" style={{ animationDelay: '0.5s' }}>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🐕</span>
                   <div>
@@ -423,7 +441,7 @@ export default function HomePage() {
                 </div>
               </div>
               
-              <div className="absolute bottom-20 left-0 bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-xl p-3 animate-float" style={{ animationDelay: '1s' }}>
+              <div className="absolute bottom-24 left-0 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-3 animate-float shadow-xl shadow-black/20" style={{ animationDelay: '1s' }}>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">📍</span>
                   <div>
@@ -433,7 +451,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="absolute top-1/2 right-0 bg-slate-800/80 backdrop-blur-sm border border-orange-500/50 rounded-xl p-3 animate-float" style={{ animationDelay: '1.5s' }}>
+              <div className="absolute top-1/2 right-0 translate-x-4 bg-slate-800/90 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-3 animate-float shadow-xl shadow-cyan-500/10" style={{ animationDelay: '1.5s' }}>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">⭐</span>
                   <div>
@@ -443,113 +461,125 @@ export default function HomePage() {
                 </div>
               </div>
               
-              {/* Phone Mockup */}
+              {/* Phone Mockup - Premium Glass Design */}
               <div className="relative z-10">
                 <div className="relative w-64 md:w-72">
                   {/* Phone Frame */}
-                  <div className="bg-gradient-to-b from-slate-700 to-slate-800 rounded-[3rem] p-2 shadow-2xl">
-                    <div className="bg-slate-900 rounded-[2.5rem] overflow-hidden">
+                  <div className="bg-gradient-to-b from-slate-600 to-slate-800 rounded-[3rem] p-2 shadow-2xl shadow-black/50">
+                    <div className="bg-[#0a1628] rounded-[2.5rem] overflow-hidden">
                       {/* Notch */}
-                      <div className="h-6 bg-slate-900 flex justify-center items-end pb-1">
-                        <div className="w-20 h-4 bg-slate-800 rounded-full"></div>
+                      <div className="h-7 bg-[#0a1628] flex justify-center items-end pb-1">
+                        <div className="w-24 h-5 bg-black rounded-full"></div>
                       </div>
-                      {/* Screen Content - Central Button Design */}
-                      <div className="h-[400px] md:h-[450px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center relative overflow-hidden">
+                      
+                      {/* Screen Content - Central Command Design */}
+                      <div className="h-[420px] md:h-[480px] bg-gradient-to-b from-[#0f1a2e] via-[#0a1628] to-[#0f1a2e] flex flex-col items-center relative overflow-hidden">
                         
-                        {/* Background Circuit Lines */}
-                        <div className="absolute inset-0 opacity-20">
-                          <svg className="w-full h-full" viewBox="0 0 300 450">
-                            <defs>
-                              <linearGradient id="circuit-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#06b6d4" />
-                                <stop offset="100%" stopColor="#f97316" />
-                              </linearGradient>
-                            </defs>
-                            {/* Horizontal lines */}
-                            <line x1="0" y1="100" x2="300" y2="100" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
-                            <line x1="0" y1="200" x2="300" y2="200" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
-                            <line x1="0" y1="300" x2="300" y2="300" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
-                            {/* Vertical lines */}
-                            <line x1="75" y1="0" x2="75" y2="450" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
-                            <line x1="150" y1="0" x2="150" y2="450" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
-                            <line x1="225" y1="0" x2="225" y2="450" stroke="url(#circuit-gradient)" strokeWidth="0.5" />
-                            {/* Dots */}
-                            <circle cx="75" cy="100" r="3" fill="#06b6d4" />
-                            <circle cx="225" cy="100" r="3" fill="#f97316" />
-                            <circle cx="75" cy="300" r="3" fill="#f97316" />
-                            <circle cx="225" cy="300" r="3" fill="#06b6d4" />
-                          </svg>
+                        {/* Top Status Bar */}
+                        <div className="w-full px-5 py-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">🐾</span>
+                            <span className="text-white font-bold text-sm">SOS Pet</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50"></div>
+                            <span className="text-emerald-400 text-xs font-medium">Online</span>
+                          </div>
                         </div>
 
-                        {/* Central Paw Button - Main Feature */}
-                        <Link href="/meus-pets" className="relative group">
-                          {/* Outer Glow Ring */}
-                          <div className="absolute -inset-8 rounded-full opacity-60">
-                            <div className="w-full h-full rounded-full bg-gradient-to-r from-cyan-500 via-orange-500 to-cyan-500 animate-spin-slow opacity-30 blur-md"></div>
+                        {/* Central Orbital System */}
+                        <div className="flex-1 flex items-center justify-center relative">
+                          
+                          {/* Outer Orbital Ring 3 */}
+                          <div className="absolute w-52 h-52 md:w-60 md:h-60 rounded-full border border-slate-700/30 animate-spin-slower">
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-cyan-400/40 rounded-full"></div>
                           </div>
                           
-                          {/* Animated Ring */}
-                          <div className="absolute -inset-6 rounded-full border-2 border-cyan-500/50 animate-ping-slow"></div>
-                          <div className="absolute -inset-4 rounded-full border border-orange-500/30"></div>
-                          
-                          {/* Main Button */}
-                          <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-cyan-500/50 flex items-center justify-center shadow-2xl shadow-cyan-500/20 group-hover:shadow-orange-500/30 transition-all duration-500 group-hover:scale-110">
-                            {/* Inner Glow */}
-                            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-orange-500/20 to-cyan-500/20 blur-sm"></div>
-                            
-                            {/* Paw Icon */}
-                            <div className="relative flex flex-col items-center">
-                              <span className="text-5xl md:text-6xl filter drop-shadow-lg">🐾</span>
-                            </div>
-                            
-                            {/* Corner Accent */}
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-400 rounded-full animate-pulse shadow-lg shadow-cyan-400/50"></div>
+                          {/* Outer Orbital Ring 2 */}
+                          <div className="absolute w-44 h-44 md:w-52 md:h-52 rounded-full border border-cyan-500/20 animate-spin-slow-reverse">
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"></div>
+                            <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-cyan-400/60 rounded-full"></div>
                           </div>
-                        </Link>
-
-                        {/* Button Label */}
-                        <div className="mt-6 text-center">
-                          <p className="text-white font-bold text-lg">Meus Pets</p>
-                          <p className="text-cyan-400 text-xs mt-1">Acesse o perfil dos seus pets</p>
-                        </div>
-
-                        {/* Bottom Action */}
-                        <div className="absolute bottom-8 left-0 right-0 px-6">
-                          <div className="bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-700">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
-                                  <span>🔔</span>
-                                </div>
-                                <div>
-                                  <p className="text-white text-sm font-bold">Home do Tutor</p>
-                                  <p className="text-gray-400 text-xs">Vacinas • Perfil • Alertas</p>
+                          
+                          {/* Inner Orbital Ring */}
+                          <div className="absolute w-36 h-36 md:w-44 md:h-44 rounded-full border border-cyan-500/30 animate-spin-slow">
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/80"></div>
+                          </div>
+                          
+                          {/* Central Paw Button */}
+                          <Link href="/meus-pets" className="relative group cursor-pointer">
+                            {/* Glow Effect */}
+                            <div className="absolute -inset-4 bg-cyan-500/20 rounded-full blur-xl group-hover:bg-cyan-500/30 transition-all duration-500"></div>
+                            
+                            {/* Main Circle */}
+                            <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-slate-700/80 to-slate-900/90 border border-cyan-500/40 flex items-center justify-center shadow-2xl shadow-cyan-500/20 group-hover:shadow-cyan-400/40 group-hover:border-cyan-400/60 transition-all duration-500 group-hover:scale-105">
+                              
+                              {/* Inner Gradient */}
+                              <div className="absolute inset-1 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 opacity-80"></div>
+                              
+                              {/* Paw Icon with Glow */}
+                              <div className="relative z-10">
+                                <svg className="w-16 h-16 md:w-20 md:h-20" viewBox="0 0 100 100" fill="none">
+                                  <ellipse cx="50" cy="65" rx="18" ry="15" fill="url(#pawGradient)" />
+                                  <ellipse cx="28" cy="45" rx="10" ry="12" fill="url(#pawGradient)" />
+                                  <ellipse cx="72" cy="45" rx="10" ry="12" fill="url(#pawGradient)" />
+                                  <ellipse cx="38" cy="28" rx="8" ry="10" fill="url(#pawGradient)" />
+                                  <ellipse cx="62" cy="28" rx="8" ry="10" fill="url(#pawGradient)" />
+                                  <defs>
+                                    <linearGradient id="pawGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                      <stop offset="0%" stopColor="#fb923c" />
+                                      <stop offset="50%" stopColor="#f97316" />
+                                      <stop offset="100%" stopColor="#ea580c" />
+                                    </linearGradient>
+                                  </defs>
+                                </svg>
+                                
+                                {/* Glow behind paw */}
+                                <div className="absolute inset-0 blur-md opacity-60">
+                                  <svg className="w-16 h-16 md:w-20 md:h-20" viewBox="0 0 100 100" fill="none">
+                                    <ellipse cx="50" cy="65" rx="18" ry="15" fill="#f97316" />
+                                    <ellipse cx="28" cy="45" rx="10" ry="12" fill="#f97316" />
+                                    <ellipse cx="72" cy="45" rx="10" ry="12" fill="#f97316" />
+                                    <ellipse cx="38" cy="28" rx="8" ry="10" fill="#f97316" />
+                                    <ellipse cx="62" cy="28" rx="8" ry="10" fill="#f97316" />
+                                  </svg>
                                 </div>
                               </div>
-                              <div className="text-cyan-400">→</div>
                             </div>
-                          </div>
+                          </Link>
                         </div>
 
-                        {/* Top Status Bar */}
-                        <div className="absolute top-4 left-0 right-0 px-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">🐾</span>
-                              <span className="text-white text-sm font-bold">SOS Pet</span>
+                        {/* Button Label */}
+                        <div className="text-center mb-4">
+                          <p className="text-white font-bold text-lg tracking-wide">Meus Pets</p>
+                          <p className="text-gray-400 text-xs mt-1">Acesse o perfil dos seus pets</p>
+                        </div>
+
+                        {/* Bottom Card - Home do Tutor */}
+                        <div className="w-full px-4 pb-6">
+                          <Link href="/meus-pets" className="block">
+                            <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-4 border border-slate-700/50 hover:border-cyan-500/30 transition-all duration-300 hover:bg-slate-800/80">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-11 h-11 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
+                                    <span className="text-xl">🔔</span>
+                                  </div>
+                                  <div>
+                                    <p className="text-white font-bold text-sm">Home do Tutor</p>
+                                    <p className="text-gray-400 text-xs">Vacinas • Perfil • Alertas</p>
+                                  </div>
+                                </div>
+                                <div className="text-cyan-400 text-xl">→</div>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <span className="text-green-400 text-xs">Online</span>
-                            </div>
-                          </div>
+                          </Link>
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  {/* Glow Ring */}
-                  <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500 via-purple-500 to-orange-500 rounded-[4rem] opacity-20 blur-xl -z-10"></div>
+                  {/* External Phone Glow */}
+                  <div className="absolute -inset-6 bg-gradient-to-r from-cyan-500/20 via-blue-500/10 to-cyan-500/20 rounded-[4rem] blur-2xl -z-10"></div>
                 </div>
               </div>
             </div>
