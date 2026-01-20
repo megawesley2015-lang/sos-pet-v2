@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import PWAInstaller from "@/components/PWAInstaller";
-import EmergencyFAB from "@/components/FAB/EmergencyFAB";
+import EmergencyFAB from "@/components/FAB";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

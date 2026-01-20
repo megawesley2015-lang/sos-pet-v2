@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSessionSafe, handleAuthError } from '@/lib/supabase';
 
 const AuthContext = createContext({});
 
@@ -10,13 +10,21 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar sessão inicial
+    // Verificar sessão inicial com interceptor de erro
     const getInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        const { session, error } = await getSessionSafe();
+
+        if (error) {
+          console.warn('Erro ao obter sessão inicial:', error.message);
+          setUser(null);
+        } else {
+          setUser(session?.user ?? null);
+        }
       } catch (error) {
-        console.error('Erro ao obter sessão:', error);
+        console.error('Erro crítico ao obter sessão:', error);
+        handleAuthError(error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -27,7 +35,20 @@ export function AuthProvider({ children }) {
     // Listener de mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null);
+        console.log('Auth state changed:', event);
+
+        // Detectar erros de token e limpar sessão
+        if (event === 'TOKEN_REFRESHED' && !session) {
+          console.warn('Token refresh falhou, limpando sessão');
+          handleAuthError({ message: 'Invalid Refresh Token' });
+        }
+
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+        } else {
+          setUser(session?.user ?? null);
+        }
+
         setLoading(false);
       }
     );

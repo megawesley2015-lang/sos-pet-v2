@@ -72,8 +72,8 @@ const MOCK_LOST_PETS = [
 ];
 
 // Estatísticas por raio
-const getStatsByRadius = (radius) => {
-  const statsMap = {
+const getStatsByRadius = (radius: number | string) => {
+  const statsMap: Record<number | string, { users: number; clinics: number; shelters: number }> = {
     5: { users: 320, clinics: 2, shelters: 1 },
     10: { users: 850, clinics: 5, shelters: 2 },
     50: { users: 2400, clinics: 15, shelters: 6 },
@@ -85,13 +85,13 @@ const getStatsByRadius = (radius) => {
 export default function AchadosEPerdidosPage() {
   // Estados principais
   const [alertMode, setAlertMode] = useState(false);
-  const [selectedRadius, setSelectedRadius] = useState(10);
+  const [selectedRadius, setSelectedRadius] = useState<number | string>(10);
   const [filterStatus, setFilterStatus] = useState("all");
   const [stats, setStats] = useState(getStatsByRadius(10));
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   
   // Modal de avistamento
-  const [sightingModal, setSightingModal] = useState({ isOpen: false, petId: null });
+  const [sightingModal, setSightingModal] = useState<{ isOpen: boolean; petId: string | null }>({ isOpen: false, petId: null });
 
   // Pets filtrados
   const filteredPets = MOCK_LOST_PETS.filter(pet => 
@@ -104,7 +104,7 @@ export default function AchadosEPerdidosPage() {
     : null;
 
   // Handlers
-  const handleRadiusChange = useCallback((radius) => {
+  const handleRadiusChange = useCallback((radius: number | string) => {
     setIsLoadingStats(true);
     setSelectedRadius(radius);
     setTimeout(() => {
@@ -122,17 +122,17 @@ export default function AchadosEPerdidosPage() {
     setAlertMode(false);
   }, []);
 
-  const handleSighting = useCallback((petId) => {
+  const handleSighting = useCallback((petId: string) => {
     setSightingModal({ isOpen: true, petId });
   }, []);
 
-  const handleSightingSubmit = useCallback(async (data) => {
+  const handleSightingSubmit = useCallback(async (data: any) => {
     console.log("📸 Avistamento:", data);
     await new Promise(r => setTimeout(r, 1500));
     alert("✅ Avistamento enviado!");
   }, []);
 
-  const handleShare = useCallback((petId) => {
+  const handleShare = useCallback((petId: string) => {
     const pet = MOCK_LOST_PETS.find(p => p.id === petId);
     if (!pet) return;
     if (navigator.share) {
@@ -147,7 +147,7 @@ export default function AchadosEPerdidosPage() {
     }
   }, []);
 
-  const handleViewDetails = useCallback((petId) => {
+  const handleViewDetails = useCallback((petId: string) => {
     console.log("Ver detalhes:", petId);
   }, []);
 
@@ -185,7 +185,7 @@ export default function AchadosEPerdidosPage() {
                 Central de <span className={alertMode ? 'text-red-400' : 'text-cyan-400'}>Resgate</span>
               </h1>
               <p className="text-gray-400 mt-2">
-                {alertMode ? `Rede acionada • ${stats.users} tutores alertados` : "Ajude a reunir pets com suas famílias"}
+                {alertMode ? `Rede acionada • ${stats?.users || 0} tutores alertados` : "Ajude a reunir pets com suas famílias"}
               </p>
             </div>
             <SOSButton 

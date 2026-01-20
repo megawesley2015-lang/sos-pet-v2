@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase, handleAuthError, getSessionSafe, getUserSafe } from "@/lib/supabase";
 
 // URL base do site (produção ou desenvolvimento)
 const getBaseUrl = () => {
@@ -36,7 +36,10 @@ export async function login({ email, password }) {
     password,
   });
 
-  if (error) throw error;
+  if (error) {
+    handleAuthError(error);
+    throw error;
+  }
   return data;
 }
 
@@ -49,19 +52,19 @@ export async function logout() {
 }
 
 /**
- * Obter usuário atual
+ * Obter usuário atual (com interceptor de erro)
  */
 export async function getUser() {
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const { user, error } = await getUserSafe();
   if (error) throw error;
   return user;
 }
 
 /**
- * Obter sessão atual
+ * Obter sessão atual (com interceptor de erro)
  */
 export async function getSession() {
-  const { data: { session }, error } = await supabase.auth.getSession();
+  const { session, error } = await getSessionSafe();
   if (error) throw error;
   return session;
 }

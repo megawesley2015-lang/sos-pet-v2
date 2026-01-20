@@ -1,1 +1,1 @@
-export { default as EmergencyFAB } from "./EmergencyFAB";
+export { default } from "./EmergencyFAB";

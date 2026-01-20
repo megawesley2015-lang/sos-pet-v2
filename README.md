@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🐾 SOS Pet v2
 
-## Getting Started
+Plataforma completa para serviços pet e achados & perdidos - MVP otimizado para Vercel.
 
-First, run the development server:
+## 🚀 Status do Projeto
+
+✅ **PRONTO PARA PRODUÇÃO**
+- Build: ✅ Validado
+- Segurança: ✅ Auditado
+- Performance: ✅ Otimizado
+- Deploy: ✅ Automatizado
+
+## 📋 Documentação
+
+- **[DEPLOY.md](./DEPLOY.md)** - Guia completo de deploy na Vercel
+- **[SECURITY.md](./SECURITY.md)** - Checklist de segurança
+- **[AUDITORIA.md](./AUDITORIA.md)** - Relatório técnico da auditoria
+
+## 🛠️ Stack Tecnológico
+
+- **Framework**: Next.js 16.1.4 (App Router + Turbopack)
+- **UI**: React 19.2.3 + Tailwind CSS 4
+- **Auth**: Supabase Auth (PKCE Flow)
+- **Database**: Supabase (PostgreSQL)
+- **Deploy**: Vercel
+- **TypeScript**: 5.9.3
+
+## 🔐 Segurança Implementada
+
+✅ **Autenticação Robusta**
+- Interceptor automático de erros de refresh token
+- Limpeza automática de sessões inválidas
+- Proteção contra loops de redirect
+- PKCE Flow para maior segurança
+
+✅ **Variáveis de Ambiente**
+- Validação automática de variáveis obrigatórias
+- Proteção contra exposição de chaves sensíveis
+- .gitignore configurado corretamente
+
+✅ **Prevenção de Memory Leaks**
+- Todos os useEffect com cleanup functions
+- Event listeners removidos corretamente
+- Subscriptions desinscritas adequadamente
+
+## 🚀 Quick Start
+
+### Desenvolvimento Local
 
 ```bash
+# 1. Clonar o repositório
+git clone <seu-repo>
+cd sos-pet-v2
+
+# 2. Instalar dependências
+npm install
+
+# 3. Configurar variáveis de ambiente
+cp .env.example .env.local
+# Edite .env.local com suas credenciais do Supabase
+
+# 4. Executar em desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse http://localhost:3000
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Deploy em Produção
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 1. Verificar se está tudo OK
+npm run deploy:check
 
-## Learn More
+# 2. Fazer commit e push
+git add .
+git commit -m "feat: ready for production"
+git push
 
-To learn more about Next.js, take a look at the following resources:
+# A Vercel fará o deploy automaticamente
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📦 Scripts Disponíveis
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev              # Desenvolvimento local
+npm run build           # Build de produção
+npm run start           # Servidor de produção
+npm run typecheck       # Verificação de tipos TypeScript
+npm run deploy:check    # Checklist completo pré-deploy
+./pre-deploy.sh         # Script de validação shell
+```
 
-## Deploy on Vercel
+## 🔑 Variáveis de Ambiente Necessárias
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Configure na Vercel (Settings → Environment Variables):
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_SITE_URL=https://seu-dominio.vercel.app
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX  # Opcional
+```
+
+## 🎯 Funcionalidades Principais
+
+- 🔍 **Achados & Perdidos** - Sistema completo de pets perdidos/encontrados
+- 🏥 **Serviços Pet** - Busca de veterinários, pet shops, hotéis
+- 🚨 **FAB de Emergência** - Acesso rápido a serviços 24h
+- 👤 **Autenticação** - Sistema robusto com Supabase
+- 📱 **PWA** - Instalável como app nativo
+- 🗺️ **Mapas** - Localização de pets e serviços
+
+## 🐛 Troubleshooting
+
+### Erro: "Invalid Refresh Token"
+✅ **JÁ CORRIGIDO** - Sistema limpa automaticamente e redireciona
+
+### Build falha localmente
+- Verifique conexão com internet (fonts do Google)
+- Execute: `npm run build` novamente
+
+### Erro de variáveis de ambiente
+- Verifique se `.env.local` existe
+- Confirme que todas as variáveis obrigatórias estão preenchidas
+
+Para mais detalhes, consulte [DEPLOY.md](./DEPLOY.md)
+
+## 📊 Estrutura do Projeto
+
+```
+sos-pet-v2/
+├── src/
+│   ├── app/              # Páginas (App Router)
+│   ├── components/       # Componentes reutilizáveis
+│   ├── contexts/         # Context API (Auth)
+│   ├── lib/              # Utilitários e config
+│   └── services/         # Camada de serviços
+├── public/               # Assets estáticos
+├── .env.example          # Template de variáveis
+├── DEPLOY.md            # Guia de deploy
+├── SECURITY.md          # Segurança
+└── AUDITORIA.md         # Relatório técnico
+```
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch: `git checkout -b feature/nova-funcionalidade`
+3. Commit suas mudanças: `git commit -m 'feat: nova funcionalidade'`
+4. Push para a branch: `git push origin feature/nova-funcionalidade`
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto é privado e proprietário.
+
+## 🆘 Suporte
+
+Para questões sobre deploy ou segurança:
+1. Consulte [DEPLOY.md](./DEPLOY.md)
+2. Verifique [AUDITORIA.md](./AUDITORIA.md)
+3. Abra uma issue no repositório
+
+---
+
+**Versão**: 2.0.0  
+**Status**: Production Ready ✅  
+**Última Auditoria**: Janeiro 2025

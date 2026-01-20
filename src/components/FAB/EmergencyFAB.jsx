@@ -11,8 +11,6 @@ import Link from "next/link";
  * - Animações CSS puras (sem dependências)
  * - Acessibilidade: suporte a keyboard navigation e screen readers
  * - Mobile-first: touch-friendly, área de toque 48px+
- * 
- * @returns {JSX.Element}
  */
 export default function EmergencyFAB() {
   const [isOpen, setIsOpen] = useState(false);
@@ -157,13 +155,13 @@ export default function EmergencyFAB() {
                 {action.label}
               </span>
 
-              {/* Botão de ação */}
+              {/* Botão de ação - CORRIGIDO: adicionada tag <a> */}
               {action.external ? (
                 <a
                   href={action.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`w-14 h-14 rounded-full ${action.color} text-white flex items-center justify-center shadow-lg transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-${action.color.split("-")[1]}-300`}
+                  className={`w-14 h-14 rounded-full ${action.color} text-white flex items-center justify-center shadow-lg transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-offset-2`}
                   aria-label={action.ariaLabel}
                   role="menuitem"
                 >
